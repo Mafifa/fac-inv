@@ -1,5 +1,4 @@
-import { useState, useEffect } from 'react';
-import { AnalysisData } from '../../interfaces';
+import { useState, useEffect } from 'react'
 
 const initialAnalysisData: AnalysisData = {
   totalFacturadoBolivares: 0,
@@ -10,31 +9,30 @@ const initialAnalysisData: AnalysisData = {
   ventasPorHora: [],
   tasaDolarHistorica: [],
   ventasPorProducto: []
-};
+}
 
 export const useAnalysis = () => {
-  const [analysisData, setAnalysisData] = useState<AnalysisData>(initialAnalysisData);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [analysisData, setAnalysisData] = useState<AnalysisData>(initialAnalysisData)
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
-    fetchAnalysisData();
-  }, []);
+    fetchAnalysisData()
+  }, [])
 
   const fetchAnalysisData = async () => {
     try {
-      setIsLoading(true);
-      setError(null);
-      const result = await window.electron.ipcRenderer.invoke('get-analysis-data');
-      setAnalysisData(result);
+      setIsLoading(true)
+      setError(null)
+      const result = await window.electron.ipcRenderer.invoke('get-analysis-data')
+      setAnalysisData(result)
     } catch (error) {
-      console.error('Error fetching analysis data:', error);
-      setError('Error al cargar los datos de análisis');
+      console.error('Error fetching analysis data:', error)
+      setError('Error al cargar los datos de análisis')
     } finally {
-      setIsLoading(false);
+      setIsLoading(false)
     }
-  };
+  }
 
-  return { analysisData, isLoading, error, refreshData: fetchAnalysisData };
-};
-
+  return { analysisData, isLoading, error, refreshData: fetchAnalysisData }
+}

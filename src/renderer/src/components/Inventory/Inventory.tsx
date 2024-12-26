@@ -1,157 +1,191 @@
-import React, { useState } from 'react';
-import { useInventory } from './useInventory';
-import { Producto } from '../../interfaces';
-import { Plus, Pencil, Trash2 } from 'lucide-react';
-import { toast } from 'sonner';
+import React, { useState, useCallback, useMemo } from 'react';
+import { useInventario } from './useInventory';
+import { Plus, Pencil, Trash2, Tag, ChevronLeft, ChevronRight, Loader, EyeOff } from 'lucide-react';
+import ModalProducto from './modalProducto';
+import ModalOferta from './modalOferta';
+import BarraBusqueda from './barraBusqueda';
 
-const Inventory: React.FC = () => {
-  const { productos, addProducto, updateProducto, disableProducto } = useInventory();
-  const [newProducto, setNewProducto] = useState<Partial<Producto>>({});
-  const [editingProducto, setEditingProducto] = useState<Producto | null>(null);
+const Inventario: React.FC = () => {
+  const {
+    productos,
+    totalProductos,
+    paginaActual,
+    setPaginaActual,
+    busqueda,
+    addProducto,
+    updateProducto,
+    disableProducto,
+    deleteProducto,
+    searchProductos,
+    isLoading,
+    error
+  } = useInventario();
+  const [modalAbierto, setModalAbierto] = useState(false);
+  const [modalOfertaAbierto, setModalOfertaAbierto] = useState(false);
+  const [productoEditando, setProductoEditando] = useState<Producto | null>(null);
+  const [productoOferta, setProductoOferta] = useState<Producto | null>(null);
 
-  const handleAddProducto = () => {
-    if (newProducto.nombre && newProducto.precio_base && newProducto.stock) {
-      addProducto(newProducto as Producto);
-      setNewProducto({});
-      toast.success('Producto agregado exitosamente');
-    } else {
-      toast.error('Por favor, complete todos los campos');
-    }
-  };
+  const handleAddProducto = useCallback((producto: Producto) => {
+    addProducto(producto);
+    setModalAbierto(false);
+  }, [addProducto]);
 
-  const handleUpdateProducto = () => {
-    if (editingProducto) {
-      updateProducto(editingProducto);
-      setEditingProducto(null);
-      toast.success('Producto actualizado exitosamente');
-    }
-  };
+  const handleUpdateProducto = useCallback((producto: Producto) => {
+    updateProducto(producto);
+    setModalAbierto(false);
+  }, [updateProducto]);
 
-  const handleDisableProducto = (id: number) => {
+  const handleDisableProducto = useCallback((id: number) => {
     disableProducto(id);
-    toast.info('Producto deshabilitado');
-  };
+  }, [disableProducto]);
+
+  const handleDeleteProducto = useCallback((id: number) => {
+    if (window.confirm('¿Está seguro de que desea eliminar este producto? Esta acción no se puede deshacer.')) {
+      deleteProducto(id);
+    }
+  }, [deleteProducto]);
+
+  const handleSearch = useCallback((query: string) => {
+    searchProductos(query);
+  }, [searchProductos]);
+
+  const productosPorPagina = 7;
+  const totalPaginas = useMemo(() => Math.ceil(totalProductos / productosPorPagina), [totalProductos]);
+
+  if (error) {
+    return (
+      <div className="text-center text-red-600">
+        <p>{error}</p>
+        <button
+          onClick={() => setPaginaActual(1)}
+          className="mt-4 bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition duration-300"
+        >
+          Reintentar
+        </button>
+      </div>
+    );
+  }
 
   return (
-    <div className="inventory">
-      <h1 className="text-3xl font-semibold text-blue-600 mb-6">Inventory</h1>
-      <div className="mb-6 bg-white shadow rounded-lg p-4">
-        <h2 className="text-xl font-semibold text-blue-600 mb-4">Add New Product</h2>
-        <div className="flex flex-wrap gap-4">
-          <input
-            type="text"
-            placeholder="Nombre"
-            value={newProducto.nombre || ''}
-            onChange={(e) => setNewProducto({ ...newProducto, nombre: e.target.value })}
-            className="flex-1 p-2 border rounded"
-          />
-          <input
-            type="number"
-            placeholder="Precio Base"
-            value={newProducto.precio_base || ''}
-            onChange={(e) => setNewProducto({ ...newProducto, precio_base: Number(e.target.value) })}
-            className="flex-1 p-2 border rounded"
-          />
-          <input
-            type="number"
-            placeholder="Stock"
-            value={newProducto.stock || ''}
-            onChange={(e) => setNewProducto({ ...newProducto, stock: Number(e.target.value) })}
-            className="flex-1 p-2 border rounded"
-          />
-          <button
-            onClick={handleAddProducto}
-            className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition duration-300"
-          >
-            <Plus className="h-5 w-5 inline-block mr-2" />
-            Add Product
-          </button>
-        </div>
+    <div className="inventario">
+      <h1 className="text-3xl font-semibold text-blue-600 mb-6">Inventario</h1>
+      <div className="mb-6 flex justify-between items-center">
+        <BarraBusqueda onSearch={handleSearch} initialValue={busqueda} />
+        <button
+          onClick={() => setModalAbierto(true)}
+          className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition duration-300"
+        >
+          <Plus className="h-5 w-5 inline-block mr-2" />
+          Agregar Producto
+        </button>
       </div>
-      <div className="bg-white shadow rounded-lg overflow-hidden">
-        <table className="min-w-full divide-y divide-gray-200">
-          <thead className="bg-gray-50">
-            <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nombre</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Precio Base</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Stock</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
-            </tr>
-          </thead>
-          <tbody className="bg-white divide-y divide-gray-200">
-            {productos.map((producto) => (
-              <tr key={producto.id_producto}>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{producto.id_producto}</td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                  {editingProducto?.id_producto === producto.id_producto ? (
-                    <input
-                      type="text"
-                      value={editingProducto.nombre}
-                      onChange={(e) => setEditingProducto({ ...editingProducto, nombre: e.target.value })}
-                      className="p-1 border rounded"
-                    />
-                  ) : (
-                    producto.nombre
-                  )}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                  {editingProducto?.id_producto === producto.id_producto ? (
-                    <input
-                      type="number"
-                      value={editingProducto.precio_base}
-                      onChange={(e) => setEditingProducto({ ...editingProducto, precio_base: Number(e.target.value) })}
-                      className="p-1 border rounded"
-                    />
-                  ) : (
-                    producto.precio_base
-                  )}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                  {editingProducto?.id_producto === producto.id_producto ? (
-                    <input
-                      type="number"
-                      value={editingProducto.stock}
-                      onChange={(e) => setEditingProducto({ ...editingProducto, stock: Number(e.target.value) })}
-                      className="p-1 border rounded"
-                    />
-                  ) : (
-                    producto.stock
-                  )}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                  {editingProducto?.id_producto === producto.id_producto ? (
-                    <button
-                      onClick={handleUpdateProducto}
-                      className="text-blue-600 hover:text-blue-800"
-                    >
-                      Save
-                    </button>
-                  ) : (
-                    <>
+      {isLoading ? (
+        <div className="flex justify-center items-center h-64">
+          <Loader className="animate-spin h-8 w-8 text-blue-600" />
+        </div>
+      ) : (
+        <>
+          <div className="bg-white shadow rounded-lg overflow-hidden">
+            <table className="min-w-full divide-y divide-gray-200">
+              <thead className="bg-gray-50">
+                <tr>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nombre</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Precio (USD)</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Precio (Bs)</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Stock</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Descuento</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Acciones</th>
+                </tr>
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-200">
+                {productos.map((producto) => (
+                  <tr key={producto.id_producto}>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{producto.id_producto}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{producto.nombre}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${producto.precio_base.toFixed(2)}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{(producto.precio_base * 30).toFixed(2)} Bs</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{producto.stock}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      {producto.descuento ? `${producto.descuento}%` : '-'}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                       <button
-                        onClick={() => setEditingProducto(producto)}
+                        onClick={() => {
+                          setProductoEditando(producto);
+                          setModalAbierto(true);
+                        }}
                         className="text-blue-600 hover:text-blue-800 mr-2"
                       >
                         <Pencil className="h-5 w-5" />
                       </button>
                       <button
                         onClick={() => handleDisableProducto(producto.id_producto)}
-                        className="text-red-600 hover:text-red-800"
+                        className="text-yellow-600 hover:text-yellow-800 mr-2"
+                      >
+                        <EyeOff className="h-5 w-5" />
+                      </button>
+                      <button
+                        onClick={() => handleDeleteProducto(producto.id_producto)}
+                        className="text-red-600 hover:text-red-800 mr-2"
                       >
                         <Trash2 className="h-5 w-5" />
                       </button>
-                    </>
-                  )}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+                      <button
+                        onClick={() => {
+                          setProductoOferta(producto);
+                          setModalOfertaAbierto(true);
+                        }}
+                        className="text-green-600 hover:text-green-800"
+                      >
+                        <Tag className="h-5 w-5" />
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          <div className="mt-4 flex justify-between items-center">
+            <button
+              onClick={() => setPaginaActual(Math.max(paginaActual - 1, 1))}
+              disabled={paginaActual === 1}
+              className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition duration-300 disabled:bg-gray-400"
+            >
+              <ChevronLeft className="h-5 w-5" />
+            </button>
+            <span>Página {paginaActual} de {totalPaginas}</span>
+            <button
+              onClick={() => setPaginaActual(Math.min(paginaActual + 1, totalPaginas))}
+              disabled={paginaActual === totalPaginas}
+              className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition duration-300 disabled:bg-gray-400"
+            >
+              <ChevronRight className="h-5 w-5" />
+            </button>
+          </div>
+        </>
+      )}
+      <ModalProducto
+        isOpen={modalAbierto}
+        onClose={() => {
+          setModalAbierto(false);
+          setProductoEditando(null);
+        }}
+        onSave={productoEditando ? handleUpdateProducto : handleAddProducto}
+        producto={productoEditando}
+      />
+      <ModalOferta
+        isOpen={modalOfertaAbierto}
+        onClose={() => {
+          setModalOfertaAbierto(false);
+          setProductoOferta(null);
+        }}
+        producto={productoOferta}
+        onSave={handleUpdateProducto}
+      />
     </div>
   );
 };
 
-export default Inventory;
+export default Inventario;
 

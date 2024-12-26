@@ -81,14 +81,19 @@ body {
 
   body {
     @apply bg-background text-foreground;
-    font-feature-settings: "rlig" 1, "calt" 1;
+    font-feature-settings:
+      'rlig' 1,
+      'calt' 1;
   }
 
   /* Estilos para los campos input en modo claro */
   input {
     @apply bg-input text-foreground border border-border rounded;
     padding: 0.5rem;
-    transition: background-color 0.3s, color 0.3s, border-color 0.3s;
+    transition:
+      background-color 0.3s,
+      color 0.3s,
+      border-color 0.3s;
   }
 
   input:hover,

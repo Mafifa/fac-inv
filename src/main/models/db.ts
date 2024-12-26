@@ -17,7 +17,8 @@ export async function getDb() {
       nombre TEXT NOT NULL,
       precio_base REAL NOT NULL,
       stock INTEGER NOT NULL,
-      activo BOOLEAN NOT NULL DEFAULT 1
+      activo BOOLEAN NOT NULL DEFAULT 1,
+      descuento REAL DEFAULT 0
     );
 
     CREATE TABLE IF NOT EXISTS ventas (
@@ -49,4 +50,3 @@ export async function getDb() {
 
   return db
 }
-
