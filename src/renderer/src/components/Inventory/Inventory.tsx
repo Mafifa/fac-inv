@@ -1,11 +1,14 @@
 import React, { useState, useCallback, useMemo } from 'react';
 import { useInventario } from './useInventory';
+import { useDolarContext } from '../../context/dolarContext'
 import { Plus, Pencil, Trash2, Tag, ChevronLeft, ChevronRight, Loader, EyeOff } from 'lucide-react';
 import ModalProducto from './modalProducto';
 import ModalOferta from './modalOferta';
 import BarraBusqueda from './barraBusqueda';
 
 const Inventario: React.FC = () => {
+  const { promedio } = useDolarContext()
+
   const {
     productos,
     totalProductos,
@@ -103,7 +106,7 @@ const Inventario: React.FC = () => {
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{producto.id_producto}</td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{producto.nombre}</td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${producto.precio_base.toFixed(2)}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{(producto.precio_base * 30).toFixed(2)} Bs</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{(producto.precio_base * promedio).toFixed(2)} Bs</td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{producto.stock}</td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                       {producto.descuento ? `${producto.descuento.toFixed(2)}%` : '-'}
