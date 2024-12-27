@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Search } from 'lucide-react';
 
 interface BarraBusquedaProps {
@@ -8,21 +8,29 @@ interface BarraBusquedaProps {
 
 const BarraBusqueda: React.FC<BarraBusquedaProps> = ({ onSearch, initialValue }) => {
   const [query, setQuery] = useState(initialValue);
-
-  // TODO
-  // Preguntar si este codigo es el mas optimo y escalable
-
-  const debouncedSearch = useCallback((value: string) => {
-    const timer = setTimeout(() => {
-      onSearch(value);
-    }, 300);
-
-    return () => clearTimeout(timer);
-  }, [onSearch]);
+  const timerRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
-    debouncedSearch(query);
-  }, [query, debouncedSearch]);
+    // Limpia el temporizador previo
+    if (timerRef.current) {
+      clearTimeout(timerRef.current);
+    }
+
+    // Si el query está vacío, no ejecuta la búsqueda
+    if (query.trim() === '') return;
+
+    // Configura un nuevo temporizador con debounce
+    timerRef.current = setTimeout(() => {
+      onSearch(query);
+    }, 300);
+
+    // Limpieza del temporizador al desmontar
+    return () => {
+      if (timerRef.current) {
+        clearTimeout(timerRef.current);
+      }
+    };
+  }, [query, onSearch]);
 
   return (
     <div className="flex items-center w-full max-w-md">
@@ -44,4 +52,3 @@ const BarraBusqueda: React.FC<BarraBusquedaProps> = ({ onSearch, initialValue })
 };
 
 export default BarraBusqueda;
-
