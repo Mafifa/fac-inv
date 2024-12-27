@@ -20,7 +20,7 @@ const App: React.FC = () => {
 
   return (
     <div className="flex flex-col h-screen bg-gray-100">
-      <Toaster position="top-right" />
+      <Toaster position="top-center" closeButton duration={2500} richColors theme='system' />
       <nav className="bg-white shadow-lg">
         <div className="max-w-7xl mx-auto px-4">
           <div className="flex justify-between h-16">

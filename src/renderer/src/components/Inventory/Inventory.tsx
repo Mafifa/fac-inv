@@ -68,8 +68,7 @@ const Inventario: React.FC = () => {
 
   return (
     <div className="inventario">
-      <h1 className="text-3xl font-semibold text-blue-600 mb-6">Inventario</h1>
-      <div className="mb-6 flex justify-between items-center">
+      <div className="mb-4 flex justify-between items-center">
         <BarraBusqueda onSearch={handleSearch} initialValue={busqueda} />
         <button
           onClick={() => setModalAbierto(true)}
@@ -107,7 +106,7 @@ const Inventario: React.FC = () => {
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{(producto.precio_base * 30).toFixed(2)} Bs</td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{producto.stock}</td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {producto.descuento ? `${producto.descuento}%` : '-'}
+                      {producto.descuento ? `${producto.descuento.toFixed(2)}%` : '-'}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                       <button
