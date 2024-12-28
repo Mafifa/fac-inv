@@ -50,9 +50,6 @@ app.whenReady().then(() => {
     optimizer.watchWindowShortcuts(window)
   })
 
-  // Setup controllers
-  setupControllers()
-
   createWindow()
 
   app.on('activate', function () {
@@ -60,6 +57,9 @@ app.whenReady().then(() => {
     // dock icon is clicked and there are no other windows open.
     if (BrowserWindow.getAllWindows().length === 0) createWindow()
   })
+
+  // Setup controllers
+  setupControllers()
 })
 
 // Quit when all windows are closed, except on macOS. There, it's common
@@ -70,4 +70,3 @@ app.on('window-all-closed', () => {
     app.quit()
   }
 })
-

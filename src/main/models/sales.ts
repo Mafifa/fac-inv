@@ -1,12 +1,39 @@
 import { getDb } from './db'
-import { Producto } from '../../renderer/src/interfaces'
 
-export async function getProductos(): Promise<Producto[]> {
+const PRODUCTOS_POR_PAGINA = 8
+
+export async function getProductos(
+  pagina: number,
+  busqueda: string
+): Promise<{ productos: Producto[]; totalPaginas: number }> {
   const db = await getDb()
-  return await db.all('SELECT * FROM productos WHERE activo = 1 AND stock > 0')
+  const offset = (pagina - 1) * PRODUCTOS_POR_PAGINA
+
+  let query = 'SELECT * FROM productos WHERE activo = 1 AND stock > 0'
+  let countQuery = 'SELECT COUNT(*) as total FROM productos WHERE activo = 1 AND stock > 0'
+  const params: any[] = []
+
+  if (busqueda) {
+    query += ' AND nombre LIKE ?'
+    countQuery += ' AND nombre LIKE ?'
+    params.push(`%${busqueda}%`)
+  }
+
+  query += ' ORDER BY nombre LIMIT ? OFFSET ?'
+  params.push(PRODUCTOS_POR_PAGINA, offset)
+
+  const productos = await db.all(query, params)
+  const { total } = await db.get(countQuery, busqueda ? [`%${busqueda}%`] : [])
+
+  const totalPaginas = Math.ceil(total / PRODUCTOS_POR_PAGINA)
+
+  return { productos, totalPaginas }
 }
 
-export async function realizarVenta(carrito: Array<{ id: number; cantidad: number }>, tasaDolar: number): Promise<void> {
+export async function realizarVenta(
+  carrito: Array<{ id: number; cantidad: number }>,
+  tasaDolar: number
+): Promise<number> {
   const db = await getDb()
   await db.run('BEGIN TRANSACTION')
 
@@ -25,16 +52,29 @@ export async function realizarVenta(carrito: Array<{ id: number; cantidad: numbe
         [lastID, item.id, item.cantidad, producto.precio_base, producto.precio_base * item.cantidad]
       )
 
-      await db.run(
-        'UPDATE productos SET stock = stock - ? WHERE id_producto = ?',
-        [item.cantidad, item.id]
-      )
+      await db.run('UPDATE productos SET stock = stock - ? WHERE id_producto = ?', [
+        item.cantidad,
+        item.id
+      ])
     }
 
     await db.run('COMMIT')
+    return lastID
   } catch (error) {
     await db.run('ROLLBACK')
     throw error
   }
 }
 
+export async function registrarPago(
+  idVenta: number,
+  metodoPago: string,
+  montoPagado: number,
+  monedaCambio: string
+): Promise<void> {
+  const db = await getDb()
+  await db.run(
+    'INSERT INTO pagos (id_venta, metodo_pago, monto, moneda_cambio) VALUES (?, ?, ?, ?)',
+    [idVenta, metodoPago, montoPagado, monedaCambio]
+  )
+}
