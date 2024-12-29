@@ -1,5 +1,4 @@
 import { getDb } from './db'
-import { Venta } from '../../renderer/src/interfaces'
 
 export async function getVentas(): Promise<Venta[]> {
   const db = await getDb()
@@ -13,11 +12,15 @@ export async function getVentas(): Promise<Venta[]> {
   `)
 }
 
-export async function registrarPago(id_venta: number, metodo_pago: string, monto: number, moneda_cambio: string): Promise<void> {
+export async function registrarPago(
+  id_venta: number,
+  metodo_pago: string,
+  monto: number,
+  moneda_cambio: string
+): Promise<void> {
   const db = await getDb()
   await db.run(
     'INSERT INTO pagos (id_venta, metodo_pago, monto, moneda_cambio) VALUES (?, ?, ?, ?)',
     [id_venta, metodo_pago, monto, moneda_cambio]
   )
 }
-

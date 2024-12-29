@@ -67,37 +67,14 @@ export async function realizarVenta(
 }
 
 export async function registrarPago(
-  idVenta: number,
-  metodoPago: string,
-  montoPagado: number,
-  monedaCambio: string
+  id_venta: number,
+  metodo_pago: string,
+  monto: number,
+  moneda_cambio: string
 ): Promise<void> {
   const db = await getDb()
-  await db.run('BEGIN TRANSACTION')
-
-  try {
-    const { tasa_dolar } = await db.get('SELECT tasa_dolar FROM ventas WHERE id_venta = ?', [
-      idVenta
-    ])
-
-    let montoBs, montoUsd
-    if (monedaCambio === 'VES') {
-      montoBs = montoPagado
-      montoUsd = montoPagado / tasa_dolar
-    } else {
-      montoBs = montoPagado * tasa_dolar
-      montoUsd = montoPagado
-    }
-
-    await db.run(
-      'INSERT INTO pagos (id_venta, metodo_pago, monto, moneda_cambio, monto_bs, monto_usd) VALUES (?, ?, ?, ?, ?, ?)',
-      [idVenta, metodoPago, montoPagado, monedaCambio, montoBs, montoUsd]
-    )
-
-    await db.run('COMMIT')
-  } catch (error) {
-    await db.run('ROLLBACK')
-    console.error('Error al registrar pago:', error)
-    throw error
-  }
+  await db.run(
+    'INSERT INTO pagos (id_venta, metodo_pago, monto, moneda_cambio) VALUES (?, ?, ?, ?)',
+    [id_venta, metodo_pago, monto, moneda_cambio]
+  )
 }

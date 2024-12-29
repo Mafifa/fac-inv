@@ -11,20 +11,16 @@ const BarraBusqueda: React.FC<BarraBusquedaProps> = ({ onSearch, initialValue })
   const timerRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
-    // Limpia el temporizador previo
     if (timerRef.current) {
       clearTimeout(timerRef.current);
     }
 
-    // Si el query está vacío, no ejecuta la búsqueda
     if (query.trim() === '') return;
 
-    // Configura un nuevo temporizador con debounce
     timerRef.current = setTimeout(() => {
       onSearch(query);
     }, 300);
 
-    // Limpieza del temporizador al desmontar
     return () => {
       if (timerRef.current) {
         clearTimeout(timerRef.current);
@@ -33,22 +29,18 @@ const BarraBusqueda: React.FC<BarraBusquedaProps> = ({ onSearch, initialValue })
   }, [query, onSearch]);
 
   return (
-    <div className="flex items-center w-full max-w-md">
+    <div className="relative">
       <input
         type="text"
         placeholder="Buscar productos..."
         value={query}
         onChange={(e) => setQuery(e.target.value)}
-        className="w-full border border-gray-300 rounded-l-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+        className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
       />
-      <button
-        onClick={() => onSearch(query)}
-        className="bg-blue-600 text-white px-4 py-2 rounded-r-md hover:bg-blue-700 transition duration-300"
-      >
-        <Search className="h-5 w-5" />
-      </button>
+      <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
     </div>
   );
 };
 
 export default BarraBusqueda;
+

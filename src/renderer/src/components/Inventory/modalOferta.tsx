@@ -24,7 +24,7 @@ const ModalOferta: React.FC<ModalOfertaProps> = ({ isOpen, onClose, onSave, prod
   };
 
   const calcularOfertaMinimaYDescuento = (costoBase: number, precioVenta: number) => {
-    const gananciaMinimaPorcentaje = 0.2; // 20% de ganancia mínima
+    const gananciaMinimaPorcentaje = 0.2;
     const precioOfertaMinimo = costoBase * (1 + gananciaMinimaPorcentaje);
     const maximoDescuento = ((precioVenta - precioOfertaMinimo) / precioVenta) * 100;
     return {
@@ -63,60 +63,62 @@ const ModalOferta: React.FC<ModalOfertaProps> = ({ isOpen, onClose, onSave, prod
   const { precioOfertaMinimo, maximoDescuento } = calcularOfertaMinimaYDescuento(producto.precio_base * 0.7, producto.precio_base);
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
-      <div className="bg-white p-6 rounded-lg w-96">
-        <div className="flex justify-between items-center mb-4">
-          <h2 className="text-xl font-semibold">Crear Oferta</h2>
-          <button onClick={onClose} className="text-gray-500 hover:text-gray-700">
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+      <div className="bg-white p-8 rounded-lg w-full max-w-md">
+        <div className="flex justify-between items-center mb-6">
+          <h2 className="text-2xl font-semibold text-gray-800">Crear Oferta</h2>
+          <button onClick={onClose} className="text-gray-500 hover:text-gray-700 transition duration-150 ease-in-out">
             <X className="h-6 w-6" />
           </button>
         </div>
-        <div className="mb-4">
-          <label className="block text-sm font-medium text-gray-700">Producto</label>
-          <input
-            type="text"
-            value={producto.nombre}
-            readOnly
-            className="mt-1 block w-full border-gray-300 rounded-md shadow-sm bg-gray-100"
-          />
+        <div className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Producto</label>
+            <input
+              type="text"
+              value={producto.nombre}
+              readOnly
+              className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm bg-gray-100 text-gray-700"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Precio Original</label>
+            <input
+              type="number"
+              value={producto.precio_base.toFixed(2)}
+              readOnly
+              className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm bg-gray-100 text-gray-700"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Descuento (%)</label>
+            <input
+              type="number"
+              value={descuentoPorcentaje}
+              onChange={(e) => handleDescuentoChange(Number(e.target.value))}
+              max={maximoDescuento}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Precio de Oferta</label>
+            <input
+              type="number"
+              value={precioOferta.toFixed(2)}
+              onChange={(e) => handlePrecioOfertaChange(Number(e.target.value))}
+              min={precioOfertaMinimo}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            />
+          </div>
+          <div className="text-sm text-gray-600">
+            <p>Precio mínimo recomendado: ${precioOfertaMinimo.toFixed(2)}</p>
+            <p>Descuento máximo recomendado: {maximoDescuento.toFixed(2)}%</p>
+          </div>
         </div>
-        <div className="mb-4">
-          <label className="block text-sm font-medium text-gray-700">Precio Original</label>
-          <input
-            type="number"
-            value={producto.precio_base.toFixed(2)}
-            readOnly
-            className="mt-1 block w-full border-gray-300 rounded-md shadow-sm bg-gray-100"
-          />
-        </div>
-        <div className="mb-4">
-          <label className="block text-sm font-medium text-gray-700">Descuento (%)</label>
-          <input
-            type="number"
-            value={descuentoPorcentaje}
-            onChange={(e) => handleDescuentoChange(Number(e.target.value))}
-            max={maximoDescuento}
-            className="mt-1 block w-full border-gray-300 rounded-md shadow-sm"
-          />
-        </div>
-        <div className="mb-4">
-          <label className="block text-sm font-medium text-gray-700">Precio de Oferta</label>
-          <input
-            type="number"
-            value={precioOferta.toFixed(2)}
-            onChange={(e) => handlePrecioOfertaChange(Number(e.target.value))}
-            min={precioOfertaMinimo}
-            className="mt-1 block w-full border-gray-300 rounded-md shadow-sm"
-          />
-        </div>
-        <div className="mb-4 text-sm text-gray-600">
-          <p>Precio mínimo recomendado: ${precioOfertaMinimo.toFixed(2)}</p>
-          <p>Descuento máximo recomendado: {maximoDescuento.toFixed(2)}%</p>
-        </div>
-        <div className="flex justify-end">
+        <div className="mt-6 flex justify-end">
           <button
             onClick={handleSave}
-            className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition duration-300"
+            className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition duration-150 ease-in-out"
           >
             Guardar Oferta
           </button>

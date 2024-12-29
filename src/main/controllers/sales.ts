@@ -10,7 +10,7 @@ export function setupSalesController(ipcMain: IpcMain): void {
     return await realizarVenta(carrito, tasaDolar)
   })
 
-  ipcMain.handle('registrar-pago', async (_, idVenta, metodoPago, montoPagado, monedaCambio) => {
-    await registrarPago(idVenta, metodoPago, montoPagado, monedaCambio)
+  ipcMain.handle('registrar-pago', async (_, id_venta, metodo_pago, monto, moneda_cambio) => {
+    return await registrarPago(id_venta, metodo_pago, monto, moneda_cambio)
   })
 }

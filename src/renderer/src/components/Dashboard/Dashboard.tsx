@@ -24,8 +24,6 @@ const Dashboard: React.FC = () => {
 
   return (
     <div className="dashboard bg-gray-100 p-6 min-h-screen">
-      <h1 className="text-3xl font-bold text-gray-800 mb-8">Dashboard</h1>
-
       {/* Sección: Tasas del Dólar */}
       <section className="mb-10">
         <h2 className="text-2xl font-semibold text-gray-800 mb-4">Tasas del Dólar</h2>

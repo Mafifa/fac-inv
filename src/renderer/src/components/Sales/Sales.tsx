@@ -2,6 +2,7 @@ import React, { useState, useCallback, useMemo } from 'react';
 import { useVentas } from './useSales';
 import { useDolarContext } from '../../context/dolarContext';
 import { toast } from 'sonner';
+import { Search, ShoppingCart, Plus, Minus, X } from 'lucide-react';
 
 const Ventas: React.FC = () => {
   const { tasasDolar } = useDolarContext();
@@ -108,33 +109,37 @@ const Ventas: React.FC = () => {
   }, [calcularTotal, metodoPago, montoPagado, tasaDolarPromedio]);
 
   return (
-    <div className="ventas px-4">
+    <div className="ventas bg-gray-100 -mt-2">
       <div className="mb-4">
-        <input
-          type="text"
-          placeholder="Buscar productos..."
-          value={filtroBusqueda}
-          onChange={handleBusqueda}
-          className="w-full p-2 border rounded"
-        />
+        <div className="relative">
+          <input
+            type="text"
+            placeholder="Buscar productos..."
+            value={filtroBusqueda}
+            onChange={handleBusqueda}
+            className="w-full p-3 pl-10 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          />
+          <Search className="absolute left-3 top-3 text-gray-400" />
+        </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div className="productos">
-          <h2 className="text-xl font-semibold mb-2">Productos</h2>
-          <div className="border rounded p-2 h-96 overflow-y-auto">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <div className="bg-white rounded-lg shadow-md p-6">
+          <h2 className="text-2xl font-semibold mb-2 text-gray-800">Productos</h2>
+          <div className="h-[calc(100vh-300px)] overflow-y-auto">
             {productos.map((producto: Producto) => (
-              <div key={producto.id_producto} className="flex justify-between items-center mb-2 p-2 hover:bg-gray-100">
+              <div key={producto.id_producto} className="flex justify-between items-center mb-4 p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition duration-150 ease-in-out">
                 <div>
-                  <div className="font-semibold">{producto.nombre}</div>
+                  <div className="font-semibold text-gray-800">{producto.nombre}</div>
                   <div className="text-sm text-gray-600">
                     ${producto.precio_base.toFixed(2)} / {(producto.precio_base * tasaDolarPromedio).toFixed(2)} Bs
                   </div>
                 </div>
                 <button
                   onClick={() => agregarAlCarrito(producto.id_producto)}
-                  className="bg-blue-500 text-white px-2 py-1 rounded hover:bg-blue-600"
+                  className="bg-blue-500 text-white px-3 py-2 rounded-lg hover:bg-blue-600 transition duration-150 ease-in-out flex items-center"
                 >
+                  <Plus size={18} className="mr-1" />
                   Agregar
                 </button>
               </div>
@@ -144,30 +149,32 @@ const Ventas: React.FC = () => {
             <button
               onClick={() => cambiarPagina(paginaActual - 1)}
               disabled={paginaActual === 1}
-              className="bg-gray-300 px-2 py-1 rounded disabled:opacity-50"
+              className="bg-gray-200 text-gray-700 px-4 py-2 rounded-lg disabled:opacity-50 hover:bg-gray-300 transition duration-150 ease-in-out"
             >
               Anterior
             </button>
-            <span>Página {paginaActual} de {totalPaginas}</span>
+            <span className="text-gray-600">Página {paginaActual} de {totalPaginas}</span>
             <button
               onClick={() => cambiarPagina(paginaActual + 1)}
               disabled={paginaActual === totalPaginas}
-              className="bg-gray-300 px-2 py-1 rounded disabled:opacity-50"
+              className="bg-gray-200 text-gray-700 px-4 py-2 rounded-lg disabled:opacity-50 hover:bg-gray-300 transition duration-150 ease-in-out"
             >
               Siguiente
             </button>
           </div>
         </div>
 
-        <div className="carrito">
-          <h2 className="text-xl font-semibold mb-2">Carrito</h2>
-          <div className="border rounded p-2 h-96 overflow-y-auto">
+        <div className="bg-white rounded-lg shadow-md p-6">
+          <h2 className="text-2xl font-semibold mb-4 text-gray-800 flex items-center">
+            <ShoppingCart className="mr-2" /> Carrito
+          </h2>
+          <div className="h-[calc(100vh-400px)] overflow-y-auto mb-4">
             {carrito.map(item => {
               const producto = productos.find(p => p.id_producto === item.id);
               return producto ? (
-                <div key={item.id} className="flex justify-between items-center mb-2 p-2 hover:bg-gray-100">
+                <div key={item.id} className="flex justify-between items-center mb-4 p-3 bg-gray-50 rounded-lg">
                   <div>
-                    <div className="font-semibold">{producto.nombre}</div>
+                    <div className="font-semibold text-gray-800">{producto.nombre}</div>
                     <div className="text-sm text-gray-600">
                       ${(producto.precio_base * item.cantidad).toFixed(2)} /
                       {(producto.precio_base * item.cantidad * tasaDolarPromedio).toFixed(2)} Bs
@@ -176,29 +183,29 @@ const Ventas: React.FC = () => {
                   <div className="flex items-center">
                     <button
                       onClick={() => actualizarCantidadCarrito(item.id, item.cantidad - 1)}
-                      className="bg-red-500 text-white px-2 py-1 rounded mr-2 hover:bg-red-600"
+                      className="bg-red-500 text-white p-1 rounded-full hover:bg-red-600 transition duration-150 ease-in-out"
                     >
-                      -
+                      <Minus size={18} />
                     </button>
-                    <span>{item.cantidad}</span>
+                    <span className="mx-3 font-semibold">{item.cantidad}</span>
                     <button
                       onClick={() => actualizarCantidadCarrito(item.id, item.cantidad + 1)}
-                      className="bg-green-500 text-white px-2 py-1 rounded ml-2 hover:bg-green-600"
+                      className="bg-green-500 text-white p-1 rounded-full hover:bg-green-600 transition duration-150 ease-in-out"
                     >
-                      +
+                      <Plus size={18} />
                     </button>
                   </div>
                 </div>
               ) : null;
             })}
           </div>
-          <div className="mt-4">
-            <div className="text-xl font-bold mb-2">
+          <div className="border-t pt-4">
+            <div className="text-2xl font-bold mb-4 text-gray-800">
               Total: ${calcularTotal().toFixed(2)} / {(calcularTotal() * tasaDolarPromedio).toFixed(2)} Bs
             </div>
             <button
               onClick={handleRealizarVenta}
-              className="w-full bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600"
+              className="w-full bg-green-500 text-white px-6 py-3 rounded-lg hover:bg-green-600 transition duration-150 ease-in-out text-lg font-semibold"
             >
               Realizar Venta
             </button>
@@ -207,19 +214,21 @@ const Ventas: React.FC = () => {
       </div>
 
       {modalPagoVisible && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
-          <div className="bg-white p-4 rounded max-w-md w-full">
-            <h2 className="text-xl font-bold mb-4">Registrar Pago</h2>
-            <div className="mb-4">
-              <div className="text-lg">Total a pagar:</div>
-              <div className="text-2xl font-bold">${calcularTotal().toFixed(2)} / {(calcularTotal() * tasaDolarPromedio).toFixed(2)} Bs</div>
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+          <div className="bg-white p-8 rounded-lg max-w-md w-full">
+            <h2 className="text-2xl font-bold mb-6 text-gray-800">Registrar Pago</h2>
+            <div className="mb-6">
+              <div className="text-lg text-gray-600">Total a pagar:</div>
+              <div className="text-3xl font-bold text-gray-800">
+                ${calcularTotal().toFixed(2)} / {(calcularTotal() * tasaDolarPromedio).toFixed(2)} Bs
+              </div>
             </div>
-            <div className="mb-4">
-              <label className="block mb-2">Método de pago:</label>
+            <div className="mb-6">
+              <label className="block mb-2 text-gray-700">Método de pago:</label>
               <select
                 value={metodoPago}
                 onChange={(e) => setMetodoPago(e.target.value as 'efectivo' | 'dolares' | 'transferencia')}
-                className="w-full p-2 border rounded"
+                className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
                 <option value="efectivo">Efectivo (Bs)</option>
                 <option value="dolares">Dólares</option>
@@ -227,20 +236,20 @@ const Ventas: React.FC = () => {
               </select>
             </div>
             {metodoPago !== 'transferencia' && (
-              <div className="mb-4">
-                <label className="block mb-2">Monto pagado ({metodoPago === 'efectivo' ? 'Bs' : '$'}):</label>
+              <div className="mb-6">
+                <label className="block mb-2 text-gray-700">Monto pagado ({metodoPago === 'efectivo' ? 'Bs' : '$'}):</label>
                 <input
                   type="number"
                   value={montoPagado}
                   onChange={(e) => setMontoPagado(e.target.value)}
-                  className="w-full p-2 border rounded"
+                  className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
             )}
             {metodoPago !== 'transferencia' && (
-              <div className="mb-4">
-                <div className="text-lg">Cambio:</div>
-                <div className="text-2xl font-bold">
+              <div className="mb-6">
+                <div className="text-lg text-gray-600">Cambio:</div>
+                <div className="text-2xl font-bold text-gray-800">
                   {metodoPago === 'efectivo'
                     ? `${calcularCambio().toFixed(2)} Bs`
                     : metodoPago === 'dolares'
@@ -253,13 +262,13 @@ const Ventas: React.FC = () => {
             <div className="flex justify-end">
               <button
                 onClick={() => setModalPagoVisible(false)}
-                className="bg-gray-300 text-black px-4 py-2 rounded mr-2 hover:bg-gray-400"
+                className="bg-gray-300 text-gray-800 px-6 py-3 rounded-lg mr-4 hover:bg-gray-400 transition duration-150 ease-in-out"
               >
                 Cancelar
               </button>
               <button
                 onClick={handlePago}
-                className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+                className="bg-blue-500 text-white px-6 py-3 rounded-lg hover:bg-blue-600 transition duration-150 ease-in-out"
               >
                 Confirmar Pago
               </button>
