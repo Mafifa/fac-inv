@@ -4,7 +4,6 @@ An Electron application with React and TypeScript
 
 ## TODO LIST
 
-- Inspeccionar que el codigo de barra de busqueda funcione correctamentee y sea el mas optimo
 - Arreglar la tasa con la que se muestran los precios en el inventario
 
 ## Recommended IDE Setup

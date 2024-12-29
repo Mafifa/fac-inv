@@ -47,6 +47,41 @@ declare global {
     tasaDolarHistorica: Array<{ fecha: string; tasa: number }>
     ventasPorProducto: Array<{ nombre: string; cantidad: number; total: number }>
   }
+
+  interface DolarRate {
+    fuente: string
+    nombre: string
+    compra: number | null
+    venta: number | null
+    promedio: number
+    fechaActualizacion: string
+  }
+  export interface DashboardData {
+    totalProducts: number
+    lowStockProducts: Array<{ nombre: string; stock: number }>
+    topSellingProducts: Array<{ nombre: string; ventas: number }>
+    cashInRegister: { bolivares: number; dolares: number }
+    totalProductsSold: number
+  }
+
+  export interface DailyStats {
+    ventas: number
+    ventasDiff: number
+    ganancia: number
+    gananciaDiff: number
+    cantidadVentas: number
+    cantidadVentasDiff: number
+    productosVendidos: number
+    productosVendidosDiff: number
+  }
+
+  export interface ExchangeRates {
+    oficial: number
+    paralelo: number
+    bitcoin: number
+    promedio: number
+    fechaActualizacion: string
+  }
 }
 
 // Esto es necesario para que TypeScript trate este archivo como un módulo

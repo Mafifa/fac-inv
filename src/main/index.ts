@@ -1,4 +1,4 @@
-import { app, shell, BrowserWindow } from 'electron'
+import { app, shell, BrowserWindow, ipcMain } from 'electron'
 import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
@@ -59,7 +59,7 @@ app.whenReady().then(() => {
   })
 
   // Setup controllers
-  setupControllers()
+  setupControllers(ipcMain)
 })
 
 // Quit when all windows are closed, except on macOS. There, it's common
