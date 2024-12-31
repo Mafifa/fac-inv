@@ -6,6 +6,10 @@ An Electron application with React and TypeScript
 
 - Arreglar la tasa con la que se muestran los precios en el inventario
 
+- Buscar la forma te integrar la logica de negocio, bolivares paralelos
+
+- Integrar configuraciones del menu
+
 ## Recommended IDE Setup
 
 - [VSCode](https://code.visualstudio.com/) + [ESLint](https://marketplace.visualstudio.com/items?itemName=dbaeumer.vscode-eslint) + [Prettier](https://marketplace.visualstudio.com/items?itemName=esbenp.prettier-vscode)

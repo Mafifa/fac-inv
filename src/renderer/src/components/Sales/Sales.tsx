@@ -22,7 +22,7 @@ const Ventas: React.FC = () => {
   } = useVentas();
 
   const [modalPagoVisible, setModalPagoVisible] = useState(false);
-  const [metodoPago, setMetodoPago] = useState<'efectivo' | 'dolares' | 'transferencia'>('efectivo');
+  const [metodoPago, setMetodoPago] = useState<'efectivo' | 'dolares' | 'transferencia' | 'punto'>('efectivo');
   const [montoPagado, setMontoPagado] = useState('');
   const [ventaActual, setVentaActual] = useState<number | null>(null);
 
@@ -31,6 +31,10 @@ const Ventas: React.FC = () => {
       (tasasDolar.find(t => t.fuente === 'bitcoin')?.promedio || 0);
     return tasaDolar > 0 ? tasaDolar / 2 : 0;
   }, [tasasDolar]);
+
+  const tasaBCV = useMemo(() => {
+    return tasasDolar.find(t => t.fuente === 'oficial')?.promedio || tasaDolarPromedio;
+  }, [tasasDolar, tasaDolarPromedio]);
 
   const calcularTotal = useCallback(() => {
     return carrito.reduce((total, item) => {
@@ -80,7 +84,7 @@ const Ventas: React.FC = () => {
         toast.error('El monto pagado es insuficiente');
         return;
       }
-    } else if (metodoPago === 'transferencia') {
+    } else if (metodoPago === 'transferencia' || metodoPago === 'punto') {
       montoFinal = total * tasaDolarPromedio;
     }
 
@@ -99,13 +103,19 @@ const Ventas: React.FC = () => {
   const calcularCambio = useCallback(() => {
     const total = calcularTotal();
     const pagado = parseFloat(montoPagado);
-    if (isNaN(pagado)) return 0;
+    if (isNaN(pagado)) return { bolivares: 0, dolares: 0 };
+
     if (metodoPago === 'efectivo') {
-      return pagado - total * tasaDolarPromedio;
+      const cambioBolivares = pagado - (total * tasaDolarPromedio);
+      return { bolivares: cambioBolivares, dolares: 0 };
     } else if (metodoPago === 'dolares') {
-      return (pagado - total) * tasaDolarPromedio;
+      const cambioDolares = pagado - total;
+      return {
+        bolivares: cambioDolares * tasaDolarPromedio,
+        dolares: cambioDolares
+      };
     }
-    return 0;
+    return { bolivares: 0, dolares: 0 };
   }, [calcularTotal, metodoPago, montoPagado, tasaDolarPromedio]);
 
   return (
@@ -127,7 +137,7 @@ const Ventas: React.FC = () => {
         <div className="bg-white rounded-lg shadow-md p-6">
           <h2 className="text-2xl font-semibold mb-2 text-gray-800">Productos</h2>
           <div className="h-[calc(100vh-300px)] overflow-y-auto">
-            {productos.map((producto: Producto) => (
+            {productos.map((producto) => (
               <div key={producto.id_producto} className="flex justify-between items-center mb-4 p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition duration-150 ease-in-out">
                 <div>
                   <div className="font-semibold text-gray-800">{producto.nombre}</div>
@@ -216,7 +226,15 @@ const Ventas: React.FC = () => {
       {modalPagoVisible && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
           <div className="bg-white p-8 rounded-lg max-w-md w-full">
-            <h2 className="text-2xl font-bold mb-6 text-gray-800">Registrar Pago</h2>
+            <div className="flex justify-between items-center mb-6">
+              <h2 className="text-2xl font-bold text-gray-800">Registrar Pago</h2>
+              <button
+                onClick={() => setModalPagoVisible(false)}
+                className="text-gray-500 hover:text-gray-700"
+              >
+                <X size={24} />
+              </button>
+            </div>
             <div className="mb-6">
               <div className="text-lg text-gray-600">Total a pagar:</div>
               <div className="text-3xl font-bold text-gray-800">
@@ -227,17 +245,20 @@ const Ventas: React.FC = () => {
               <label className="block mb-2 text-gray-700">Método de pago:</label>
               <select
                 value={metodoPago}
-                onChange={(e) => setMetodoPago(e.target.value as 'efectivo' | 'dolares' | 'transferencia')}
+                onChange={(e) => setMetodoPago(e.target.value as 'efectivo' | 'dolares' | 'transferencia' | 'punto')}
                 className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
                 <option value="efectivo">Efectivo (Bs)</option>
+                <option value="punto">Punto</option>
                 <option value="dolares">Dólares</option>
                 <option value="transferencia">Transferencia</option>
               </select>
             </div>
-            {metodoPago !== 'transferencia' && (
+            {(metodoPago === 'efectivo' || metodoPago === 'dolares') && (
               <div className="mb-6">
-                <label className="block mb-2 text-gray-700">Monto pagado ({metodoPago === 'efectivo' ? 'Bs' : '$'}):</label>
+                <label className="block mb-2 text-gray-700">
+                  Monto pagado ({metodoPago === 'efectivo' ? 'Bs' : '$'}):
+                </label>
                 <input
                   type="number"
                   value={montoPagado}
@@ -246,23 +267,26 @@ const Ventas: React.FC = () => {
                 />
               </div>
             )}
-            {metodoPago !== 'transferencia' && (
-              <div className="mb-6">
-                <div className="text-lg text-gray-600">Cambio:</div>
-                <div className="text-2xl font-bold text-gray-800">
-                  {metodoPago === 'efectivo'
-                    ? `${calcularCambio().toFixed(2)} Bs`
-                    : metodoPago === 'dolares'
-                      ? `${(calcularCambio() / tasaDolarPromedio).toFixed(2)} $`
-                      : 'N/A'
-                  }
+            {metodoPago === 'efectivo' && montoPagado && (
+              <div className="mb-6 p-4 bg-gray-50 rounded-lg">
+                <div className="text-lg font-semibold text-gray-700 mb-2">Cambio:</div>
+                <div className="text-xl text-gray-800">
+                  {calcularCambio().bolivares.toFixed(2)} Bs
                 </div>
               </div>
             )}
-            <div className="flex justify-end">
+            {metodoPago === 'dolares' && montoPagado && (
+              <div className="mb-6 p-4 bg-gray-50 rounded-lg">
+                <div className="text-lg font-semibold text-gray-700 mb-2">Cambio:</div>
+                <div className="text-xl text-gray-800">
+                  ${calcularCambio().dolares.toFixed(2)} / {calcularCambio().bolivares.toFixed(2)} Bs
+                </div>
+              </div>
+            )}
+            <div className="flex justify-end gap-4">
               <button
                 onClick={() => setModalPagoVisible(false)}
-                className="bg-gray-300 text-gray-800 px-6 py-3 rounded-lg mr-4 hover:bg-gray-400 transition duration-150 ease-in-out"
+                className="bg-gray-300 text-gray-800 px-6 py-3 rounded-lg hover:bg-gray-400 transition duration-150 ease-in-out"
               >
                 Cancelar
               </button>
