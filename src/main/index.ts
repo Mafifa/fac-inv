@@ -1,8 +1,9 @@
-import { app, shell, BrowserWindow, ipcMain } from 'electron'
+import { app, shell, BrowserWindow } from 'electron'
 import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
 import { setupControllers } from './controllers'
+import { setupConfigHandlers } from './settings/configStore'
 
 function createWindow(): void {
   // Create the browser window.
@@ -51,6 +52,7 @@ app.whenReady().then(() => {
   })
 
   createWindow()
+  setupConfigHandlers()
 
   app.on('activate', function () {
     // On macOS it's common to re-create a window in the app when the
@@ -59,7 +61,7 @@ app.whenReady().then(() => {
   })
 
   // Setup controllers
-  setupControllers(ipcMain)
+  setupControllers()
 })
 
 // Quit when all windows are closed, except on macOS. There, it's common

@@ -1,6 +1,7 @@
 import React from 'react';
 import { useDashboard } from './useDashboard';
-import { DollarSign, ShoppingCart, TrendingUp, AlertTriangle, ArrowUpRight, ArrowDownRight, Package, ShoppingBag, BarChart2 } from 'lucide-react';
+import { useDolarContext } from '../../context/dolarContext';
+import { DollarSign, ShoppingCart, TrendingUp, AlertTriangle, ArrowUpRight, ArrowDownRight, Package, ShoppingBag, BarChart2, Loader } from 'lucide-react';
 
 const Dashboard: React.FC = () => {
   const {
@@ -13,6 +14,8 @@ const Dashboard: React.FC = () => {
     dailyStats
   }: DashboardData & { exchangeRates: ExchangeRates, dailyStats: DailyStats } = useDashboard();
 
+  const { isLoading, error } = useDolarContext();
+
   const CardWrapper: React.FC<{ children: React.ReactNode, className?: string, accentColor?: string }> = ({ children, className, accentColor }) => (
     <div className={`bg-white rounded-lg shadow-md overflow-hidden ${className}`}>
       <div className={`h-1 ${accentColor}`}></div>
@@ -22,30 +25,43 @@ const Dashboard: React.FC = () => {
     </div>
   );
 
+  const ExchangeRateCard: React.FC<{ title: string, value: number, icon: React.ElementType, accentColor: string }> = ({ title, value, icon: Icon, accentColor }) => (
+    <CardWrapper accentColor={accentColor}>
+      <div className="flex justify-between items-center">
+        <div>
+          <p className="text-sm font-medium text-gray-500">{title}</p>
+          {isLoading ? (
+            <div className="flex items-center space-x-2">
+              <Loader className="h-5 w-5 animate-spin text-gray-400" />
+              <span className="text-gray-400">Cargando...</span>
+            </div>
+          ) : error ? (
+            <p className="text-sm text-red-500">Error al cargar</p>
+          ) : (
+            <p className="text-2xl font-bold text-gray-800">{value.toFixed(2)} Bs</p>
+          )}
+        </div>
+        <Icon className={`h-8 w-8 ${accentColor.replace('bg-', 'text-')}`} />
+      </div>
+    </CardWrapper>
+  );
+
   return (
     <div className="dashboard bg-gray-100 p-6 min-h-screen">
       {/* Sección: Tasas del Dólar */}
       <section className="mb-10">
         <h2 className="text-2xl font-semibold text-gray-800 mb-4">Tasas del Dólar</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {[
-            { title: 'Paralelo', value: exchangeRates.paralelo, icon: DollarSign, accentColor: 'bg-blue-500' },
-            { title: 'Banco Central', value: exchangeRates.oficial, icon: DollarSign, accentColor: 'bg-green-500' },
-            { title: 'Binance', value: exchangeRates.bitcoin, icon: DollarSign, accentColor: 'bg-yellow-500' },
-            { title: 'Promedio', value: exchangeRates.promedio, icon: DollarSign, accentColor: 'bg-purple-500' },
-          ].map((rate, index) => (
-            <CardWrapper key={index} accentColor={rate.accentColor}>
-              <div className="flex justify-between items-center">
-                <div>
-                  <p className="text-sm font-medium text-gray-500">{rate.title}</p>
-                  <p className="text-2xl font-bold text-gray-800">{rate.value.toFixed(2)} Bs</p>
-                </div>
-                <rate.icon className={`h-8 w-8 ${rate.accentColor.replace('bg-', 'text-')}`} />
-              </div>
-            </CardWrapper>
-          ))}
+          <ExchangeRateCard title="Paralelo" value={exchangeRates.paralelo} icon={DollarSign} accentColor="bg-blue-500" />
+          <ExchangeRateCard title="Banco Central" value={exchangeRates.oficial} icon={DollarSign} accentColor="bg-green-500" />
+          <ExchangeRateCard title="Binance" value={exchangeRates.bitcoin} icon={DollarSign} accentColor="bg-yellow-500" />
+          <ExchangeRateCard title="Promedio" value={exchangeRates.promedio} icon={DollarSign} accentColor="bg-purple-500" />
         </div>
-        <p className="text-sm text-gray-600 mt-2">Última actualización: {exchangeRates.fechaActualizacion}</p>
+        {error ? (
+          <p className="text-sm text-red-500 mt-2">Error de red: No se pudo obtener las tasas</p>
+        ) : (
+          <p className="text-sm text-gray-600 mt-2">Última actualización: {exchangeRates.fechaActualizacion}</p>
+        )}
       </section>
 
       {/* Sección: Facturación del Día */}
