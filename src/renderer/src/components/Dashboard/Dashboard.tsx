@@ -1,11 +1,10 @@
 import React from 'react';
 import { useDashboard } from './useDashboard';
-import { useDolarContext } from '../../context/dolarContext';
+import { useAppContext } from '../../context/appContext';
 import { DollarSign, ShoppingCart, TrendingUp, AlertTriangle, ArrowUpRight, ArrowDownRight, Package, ShoppingBag, BarChart2, Loader } from 'lucide-react';
 
 const Dashboard: React.FC = () => {
   const {
-    totalProducts,
     lowStockProducts,
     topSellingProducts,
     cashInRegister,
@@ -14,7 +13,7 @@ const Dashboard: React.FC = () => {
     dailyStats
   }: DashboardData & { exchangeRates: ExchangeRates, dailyStats: DailyStats } = useDashboard();
 
-  const { isLoading, error } = useDolarContext();
+  const { isLoading, error } = useAppContext();
 
   const CardWrapper: React.FC<{ children: React.ReactNode, className?: string, accentColor?: string }> = ({ children, className, accentColor }) => (
     <div className={`bg-white rounded-lg shadow-md overflow-hidden ${className}`}>

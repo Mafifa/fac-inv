@@ -1,5 +1,4 @@
 import https from 'https'
-import { ipcMain } from 'electron'
 
 interface DolarRate {
   fuente: string

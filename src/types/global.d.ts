@@ -37,15 +37,18 @@ declare global {
     moneda_cambio: string
   }
 
-  export interface AnalysisData {
+  interface AnalysisData {
     totalFacturadoBolivares: number
     totalFacturadoDolares: number
     productoMasVendido: string
     cantidadProductoMasVendido: number
     promedioVentaDiaria: number
-    ventasPorHora: Array<{ hora: string; ventas: number }>
-    tasaDolarHistorica: Array<{ fecha: string; tasa: number }>
-    ventasPorProducto: Array<{ nombre: string; cantidad: number; total: number }>
+    ventasPorHora: { hora: string; ventas: number }[]
+    tasaDolarHistorica: { fecha: string; tasa: number }[]
+    ventasPorProducto: { nombre: string; cantidad: number; total: number }[]
+    ventasPorDiaSemana: { dia: string; ventas: number }[]
+    ventasPorFecha: { fecha: string; ventas: number }[]
+    productosMasVendidos: []
   }
 
   interface DolarRate {

@@ -1,11 +1,11 @@
-import React, { useState, useCallback, useMemo } from 'react';
+import React, { useState, useCallback } from 'react';
 import { useVentas } from './useSales';
-import { useDolarContext } from '../../context/dolarContext';
+import { useAppContext } from '../../context/appContext';
 import { toast } from 'sonner';
 import { Search, ShoppingCart, Plus, Minus, X } from 'lucide-react';
 
 const Ventas: React.FC = () => {
-  const { tasasDolar } = useDolarContext();
+  const { getTasaCambio } = useAppContext();
   const {
     productos,
     carrito,
@@ -26,16 +26,6 @@ const Ventas: React.FC = () => {
   const [montoPagado, setMontoPagado] = useState('');
   const [ventaActual, setVentaActual] = useState<number | null>(null);
 
-  const tasaDolarPromedio = useMemo(() => {
-    const tasaDolar = (tasasDolar.find(t => t.fuente === 'oficial')?.promedio || 0) +
-      (tasasDolar.find(t => t.fuente === 'bitcoin')?.promedio || 0);
-    return tasaDolar > 0 ? tasaDolar / 2 : 0;
-  }, [tasasDolar]);
-
-  const tasaBCV = useMemo(() => {
-    return tasasDolar.find(t => t.fuente === 'oficial')?.promedio || tasaDolarPromedio;
-  }, [tasasDolar, tasaDolarPromedio]);
-
   const calcularTotal = useCallback(() => {
     return carrito.reduce((total, item) => {
       const producto = productos.find(p => p.id_producto === item.id);
@@ -53,13 +43,13 @@ const Ventas: React.FC = () => {
       return;
     }
     try {
-      const idVenta = await realizarVenta(carrito, tasaDolarPromedio);
+      const idVenta = await realizarVenta(carrito, getTasaCambio('facturacion'));
       setVentaActual(idVenta);
       setModalPagoVisible(true);
     } catch (error) {
       toast.error('Error al realizar la venta');
     }
-  }, [carrito, realizarVenta, tasaDolarPromedio]);
+  }, [carrito, realizarVenta, getTasaCambio('facturacion')]);
 
   const handlePago = useCallback(async () => {
     if (!ventaActual) {
@@ -72,8 +62,8 @@ const Ventas: React.FC = () => {
     let monedaCambio = 'VES';
 
     if (metodoPago === 'efectivo') {
-      montoFinal = montoPagado ? parseFloat(montoPagado) : total * tasaDolarPromedio;
-      if (montoFinal < total * tasaDolarPromedio) {
+      montoFinal = montoPagado ? parseFloat(montoPagado) : total * getTasaCambio('facturacion');
+      if (montoFinal < total * getTasaCambio('facturacion')) {
         toast.error('El monto pagado es insuficiente');
         return;
       }
@@ -85,7 +75,7 @@ const Ventas: React.FC = () => {
         return;
       }
     } else if (metodoPago === 'transferencia' || metodoPago === 'punto') {
-      montoFinal = total * tasaDolarPromedio;
+      montoFinal = total * getTasaCambio('facturacion');
     }
 
     try {
@@ -98,7 +88,7 @@ const Ventas: React.FC = () => {
     } catch (error) {
       toast.error('Error al registrar el pago');
     }
-  }, [ventaActual, calcularTotal, metodoPago, montoPagado, tasaDolarPromedio, registrarPago, limpiarCarrito]);
+  }, [ventaActual, calcularTotal, metodoPago, montoPagado, getTasaCambio('facturacion'), registrarPago, limpiarCarrito]);
 
   const calcularCambio = useCallback(() => {
     const total = calcularTotal();
@@ -106,17 +96,17 @@ const Ventas: React.FC = () => {
     if (isNaN(pagado)) return { bolivares: 0, dolares: 0 };
 
     if (metodoPago === 'efectivo') {
-      const cambioBolivares = pagado - (total * tasaDolarPromedio);
+      const cambioBolivares = pagado - (total * getTasaCambio('facturacion'));
       return { bolivares: cambioBolivares, dolares: 0 };
     } else if (metodoPago === 'dolares') {
       const cambioDolares = pagado - total;
       return {
-        bolivares: cambioDolares * tasaDolarPromedio,
+        bolivares: cambioDolares * getTasaCambio('facturacion'),
         dolares: cambioDolares
       };
     }
     return { bolivares: 0, dolares: 0 };
-  }, [calcularTotal, metodoPago, montoPagado, tasaDolarPromedio]);
+  }, [calcularTotal, metodoPago, montoPagado, getTasaCambio('facturacion')]);
 
   return (
     <div className="ventas bg-gray-100 -mt-2">
@@ -142,7 +132,7 @@ const Ventas: React.FC = () => {
                 <div>
                   <div className="font-semibold text-gray-800">{producto.nombre}</div>
                   <div className="text-sm text-gray-600">
-                    ${producto.precio_base.toFixed(2)} / {(producto.precio_base * tasaDolarPromedio).toFixed(2)} Bs
+                    ${producto.precio_base.toFixed(2)} / {(producto.precio_base * getTasaCambio('facturacion')).toFixed(2)} Bs
                   </div>
                 </div>
                 <button
@@ -187,7 +177,7 @@ const Ventas: React.FC = () => {
                     <div className="font-semibold text-gray-800">{producto.nombre}</div>
                     <div className="text-sm text-gray-600">
                       ${(producto.precio_base * item.cantidad).toFixed(2)} /
-                      {(producto.precio_base * item.cantidad * tasaDolarPromedio).toFixed(2)} Bs
+                      {(producto.precio_base * item.cantidad * getTasaCambio('facturacion')).toFixed(2)} Bs
                     </div>
                   </div>
                   <div className="flex items-center">
@@ -211,7 +201,7 @@ const Ventas: React.FC = () => {
           </div>
           <div className="border-t pt-4">
             <div className="text-2xl font-bold mb-4 text-gray-800">
-              Total: ${calcularTotal().toFixed(2)} / {(calcularTotal() * tasaDolarPromedio).toFixed(2)} Bs
+              Total: ${calcularTotal().toFixed(2)} / {(calcularTotal() * getTasaCambio('facturacion')).toFixed(2)} Bs
             </div>
             <button
               onClick={handleRealizarVenta}
@@ -238,7 +228,7 @@ const Ventas: React.FC = () => {
             <div className="mb-6">
               <div className="text-lg text-gray-600">Total a pagar:</div>
               <div className="text-3xl font-bold text-gray-800">
-                ${calcularTotal().toFixed(2)} / {(calcularTotal() * tasaDolarPromedio).toFixed(2)} Bs
+                ${calcularTotal().toFixed(2)} / {(calcularTotal() * getTasaCambio('facturacion')).toFixed(2)} Bs
               </div>
             </div>
             <div className="mb-6">

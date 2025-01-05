@@ -2,15 +2,16 @@ import { getDb } from './db'
 
 export async function getSalesHistory(offset: number, limit: number, searchId: string | null) {
   const db = await getDb()
+
   let query = `
     WITH numbered_sales AS (
       SELECT 
         v.id_venta, 
         v.fecha_venta, 
         v.tasa_dolar,
-        SUM(dv.subtotal) as total, 
+        SUM(dv.subtotal) AS total, 
         p.metodo_pago,
-        ROW_NUMBER() OVER (ORDER BY v.id_venta DESC) as row_num
+        ROW_NUMBER() OVER (ORDER BY v.fecha_venta DESC, v.id_venta DESC) AS row_num
       FROM ventas v
       JOIN detalle_ventas dv ON v.id_venta = dv.id_venta
       JOIN pagos p ON v.id_venta = p.id_venta
@@ -18,13 +19,13 @@ export async function getSalesHistory(offset: number, limit: number, searchId: s
 
   const params: any[] = []
 
-  if (searchId !== null && searchId !== '') {
-    query += ' WHERE v.id_venta LIKE ?'
+  if (searchId !== null && searchId.trim() !== '') {
+    query += ' WHERE CAST(v.id_venta AS TEXT) LIKE ?'
     params.push(`%${searchId}%`)
   }
 
   query += `
-      GROUP BY v.id_venta
+      GROUP BY v.id_venta, v.fecha_venta, v.tasa_dolar, p.metodo_pago
     )
     SELECT 
       id_venta, 
@@ -34,10 +35,10 @@ export async function getSalesHistory(offset: number, limit: number, searchId: s
       metodo_pago
     FROM numbered_sales
     WHERE row_num > ? AND row_num <= ?
-    ORDER BY id_venta DESC
+    ORDER BY row_num ASC
   `
 
-  // Ajustamos el offset para que coincida con el número de fila
+  // Ajustamos el offset para que coincida con el rango paginado
   params.push(offset, offset + limit)
 
   const salesHistory = await db.all(query, ...params)
@@ -46,14 +47,16 @@ export async function getSalesHistory(offset: number, limit: number, searchId: s
 
 export async function getTotalSalesCount(searchId: string | null) {
   const db = await getDb()
+
   let query = `
-    SELECT COUNT(DISTINCT v.id_venta) as count 
+    SELECT COUNT(DISTINCT v.id_venta) AS count 
     FROM ventas v
   `
+
   const params: any[] = []
 
-  if (searchId !== null && searchId !== '') {
-    query += ' WHERE v.id_venta LIKE ?'
+  if (searchId !== null && searchId.trim() !== '') {
+    query += ' WHERE CAST(v.id_venta AS TEXT) LIKE ?'
     params.push(`%${searchId}%`)
   }
 
@@ -63,13 +66,14 @@ export async function getTotalSalesCount(searchId: string | null) {
 
 export async function getSaleDetails(id: number) {
   const db = await getDb()
+
   const saleDetails = await db.get(
     `
     SELECT 
       v.id_venta, 
       v.fecha_venta, 
       v.tasa_dolar,
-      SUM(dv.subtotal) as total, 
+      SUM(dv.subtotal) AS total, 
       p.metodo_pago, 
       p.monto, 
       p.moneda_cambio
@@ -77,7 +81,7 @@ export async function getSaleDetails(id: number) {
     JOIN detalle_ventas dv ON v.id_venta = dv.id_venta
     JOIN pagos p ON v.id_venta = p.id_venta
     WHERE v.id_venta = ?
-    GROUP BY v.id_venta
+    GROUP BY v.id_venta, v.fecha_venta, v.tasa_dolar, p.metodo_pago, p.monto, p.moneda_cambio
   `,
     id
   )

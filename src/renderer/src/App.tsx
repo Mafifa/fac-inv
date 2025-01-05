@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { Toaster } from 'sonner';
 import Dashboard from './components/Dashboard/dashboard';
-import Inventario from './components/Inventory/inventory';
+import Inventario from './components/Inventory/Inventory';
 import Ventas from './components/Sales/sales';
 import Analisis from './components/Analysis/analysis';
 import Historial from './components/History/history';
 import Configuracion from './components/Settings/settings';
-import { DolarProvider } from './context/dolarContext';
+import { AppProvider } from './context/appContext';
 import { Home, Package, ShoppingCart, BarChart2, History, Settings } from 'lucide-react';
 
 const App: React.FC = () => {
@@ -37,7 +37,7 @@ const App: React.FC = () => {
   ];
 
   return (
-    <DolarProvider>
+    <AppProvider>
       <div className={`flex flex-col h-screen ${modoOscuro ? 'dark' : ''}`}>
         <div className={`flex-1 ${modoOscuro ? 'bg-gray-900' : 'bg-gradient-to-br from-gray-50 to-gray-100'}`}>
           <Toaster position="top-center" closeButton duration={2500} richColors />
@@ -105,7 +105,7 @@ const App: React.FC = () => {
           )}
         </div>
       </div>
-    </DolarProvider>
+    </AppProvider>
   );
 };
 

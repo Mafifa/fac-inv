@@ -61,6 +61,48 @@ export async function getAnalysisData(): Promise<AnalysisData> {
     LIMIT 10
   `)
 
+  const ventasPorDiaSemana = await db.all(`
+    SELECT 
+      CASE CAST(strftime('%w', v.fecha_venta) AS INTEGER)
+        WHEN 0 THEN 'Domingo'
+        WHEN 1 THEN 'Lunes'
+        WHEN 2 THEN 'Martes'
+        WHEN 3 THEN 'Miércoles'
+        WHEN 4 THEN 'Jueves'
+        WHEN 5 THEN 'Viernes'
+        WHEN 6 THEN 'Sábado'
+      END as dia,
+      SUM(dv.subtotal / v.tasa_dolar) as ventas
+    FROM detalle_ventas dv
+    JOIN ventas v ON dv.id_venta = v.id_venta
+    GROUP BY strftime('%w', v.fecha_venta)
+    ORDER BY strftime('%w', v.fecha_venta)
+  `)
+
+  const ventasPorFecha = await db.all(`
+    SELECT 
+      DATE(v.fecha_venta) as fecha,
+      SUM(dv.subtotal / v.tasa_dolar) as ventas
+    FROM detalle_ventas dv
+    JOIN ventas v ON dv.id_venta = v.id_venta
+    GROUP BY DATE(v.fecha_venta)
+    ORDER BY fecha
+    LIMIT 30
+  `)
+
+  const productosMasVendidos = await db.all(`
+    SELECT 
+      p.nombre,
+      SUM(dv.cantidad) as cantidad,
+      SUM(dv.subtotal / v.tasa_dolar) as total
+    FROM detalle_ventas dv
+    JOIN productos p ON dv.id_producto = p.id_producto
+    JOIN ventas v ON dv.id_venta = v.id_venta
+    GROUP BY dv.id_producto
+    ORDER BY cantidad DESC
+    LIMIT 5
+  `)
+
   return {
     totalFacturadoBolivares: totalFacturado.totalBolivares || 0,
     totalFacturadoDolares: totalFacturado.totalDolares || 0,
@@ -69,81 +111,9 @@ export async function getAnalysisData(): Promise<AnalysisData> {
     promedioVentaDiaria: promedioVenta.promedio || 0,
     ventasPorHora,
     tasaDolarHistorica,
-    ventasPorProducto
-  }
-}
-
-export async function getDashboardData(): Promise<DashboardData> {
-  const db = await getDb()
-
-  const totalSales = await db.get(`
-    SELECT SUM(dv.subtotal) as total
-    FROM detalle_ventas dv
-    JOIN ventas v ON dv.id_venta = v.id_venta
-    WHERE DATE(v.fecha_venta) = DATE('now')
-  `)
-
-  const totalProducts = await db.get(`
-    SELECT COUNT(*) as total FROM productos WHERE activo = 1
-  `)
-
-  const lowStockProducts = await db.all(`
-    SELECT nombre, stock
-    FROM productos
-    WHERE stock < 10 AND activo = 1
-    ORDER BY stock ASC
-    LIMIT 5
-  `)
-
-  const topSellingProducts = await db.all(`
-    SELECT p.nombre, SUM(dv.cantidad) as ventas
-    FROM detalle_ventas dv
-    JOIN productos p ON dv.id_producto = p.id_producto
-    JOIN ventas v ON dv.id_venta = v.id_venta
-    WHERE DATE(v.fecha_venta) = DATE('now')
-    GROUP BY dv.id_producto
-    ORDER BY ventas DESC
-    LIMIT 5
-  `)
-
-  const dailyFacturation = await db.get(`
-    SELECT 
-      SUM(dv.subtotal) as bolivares,
-      SUM(dv.subtotal / v.tasa_dolar) as dolares
-    FROM detalle_ventas dv
-    JOIN ventas v ON dv.id_venta = v.id_venta
-    WHERE DATE(v.fecha_venta) = DATE('now')
-  `)
-
-  const cashInRegister = await db.get(`
-    SELECT 
-      SUM(CASE WHEN p.moneda_cambio = 'VES' THEN p.monto ELSE p.monto * v.tasa_dolar END) as bolivares,
-      SUM(CASE WHEN p.moneda_cambio = 'USD' THEN p.monto ELSE p.monto / v.tasa_dolar END) as dolares
-    FROM pagos p
-    JOIN ventas v ON p.id_venta = v.id_venta
-    WHERE DATE(v.fecha_venta) = DATE('now')
-  `)
-
-  const totalProductsSold = await db.get(`
-    SELECT SUM(dv.cantidad) as total
-    FROM detalle_ventas dv
-    JOIN ventas v ON dv.id_venta = v.id_venta
-    WHERE DATE(v.fecha_venta) = DATE('now')
-  `)
-
-  return {
-    totalSales: totalSales.total || 0,
-    totalProducts: totalProducts.total || 0,
-    lowStockProducts: lowStockProducts || [],
-    topSellingProducts: topSellingProducts || [],
-    dailyFacturation: {
-      bolivares: dailyFacturation?.bolivares || 0,
-      dolares: dailyFacturation?.dolares || 0
-    },
-    cashInRegister: {
-      bolivares: cashInRegister?.bolivares || 0,
-      dolares: cashInRegister?.dolares || 0
-    },
-    totalProductsSold: totalProductsSold.total || 0
+    ventasPorProducto,
+    ventasPorDiaSemana,
+    ventasPorFecha,
+    productosMasVendidos
   }
 }

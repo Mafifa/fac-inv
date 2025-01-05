@@ -24,11 +24,11 @@ const store = new Store<ConfigStore>({
 })
 
 export const setupConfigHandlers = () => {
-  ipcMain.handle('get-config', (event, key: keyof ConfigStore) => {
+  ipcMain.handle('get-config', (_, key: keyof ConfigStore) => {
     return store.get(key)
   })
 
-  ipcMain.handle('set-config', (event, key: keyof ConfigStore, value: any) => {
+  ipcMain.handle('set-config', (_, key: keyof ConfigStore, value: any) => {
     store.set(key, value)
     return true
   })

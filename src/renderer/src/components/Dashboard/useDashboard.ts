@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react'
-import { useDolarContext } from '../../context/dolarContext'
+import { useAppContext } from '../../context/appContext'
 
 export const useDashboard = () => {
-  const { tasasDolar } = useDolarContext()
+  const { tasasDolar } = useAppContext()
   const [dashboardData, setDashboardData] = useState<DashboardData>({
     totalProducts: 0,
     lowStockProducts: [],
