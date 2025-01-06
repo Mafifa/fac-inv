@@ -13,10 +13,23 @@ const Dashboard: React.FC = () => {
     dailyStats
   }: DashboardData & { exchangeRates: ExchangeRates, dailyStats: DailyStats } = useDashboard();
 
-  const { isLoading, error } = useAppContext();
+  const { isLoading, error, config } = useAppContext();
+  const isDarkMode = config.modoOscuro;
+
+  const theme = {
+    background: isDarkMode ? 'bg-gray-900' : 'bg-gray-100',
+    text: isDarkMode ? 'text-gray-100' : 'text-gray-800',
+    cardBg: isDarkMode ? 'bg-gray-800' : 'bg-white',
+    cardText: isDarkMode ? 'text-gray-300' : 'text-gray-700',
+    cardTextBold: isDarkMode ? 'text-gray-100' : 'text-gray-800',
+    cardShadow: isDarkMode ? 'shadow-lg shadow-gray-900/50' : 'shadow-md',
+    accentText: isDarkMode ? 'text-blue-400' : 'text-blue-600',
+    errorText: isDarkMode ? 'text-red-400' : 'text-red-500',
+    mutedText: isDarkMode ? 'text-gray-400' : 'text-gray-500',
+  };
 
   const CardWrapper: React.FC<{ children: React.ReactNode, className?: string, accentColor?: string }> = ({ children, className, accentColor }) => (
-    <div className={`bg-white rounded-lg shadow-md overflow-hidden ${className}`}>
+    <div className={`${theme.cardBg} rounded-lg ${theme.cardShadow} overflow-hidden ${className}`}>
       <div className={`h-1 ${accentColor}`}></div>
       <div className="p-6">
         {children}
@@ -28,16 +41,16 @@ const Dashboard: React.FC = () => {
     <CardWrapper accentColor={accentColor}>
       <div className="flex justify-between items-center">
         <div>
-          <p className="text-sm font-medium text-gray-500">{title}</p>
+          <p className={`text-sm font-medium ${theme.mutedText}`}>{title}</p>
           {isLoading ? (
             <div className="flex items-center space-x-2">
-              <Loader className="h-5 w-5 animate-spin text-gray-400" />
-              <span className="text-gray-400">Cargando...</span>
+              <Loader className={`h-5 w-5 animate-spin ${theme.mutedText}`} />
+              <span className={theme.mutedText}>Cargando...</span>
             </div>
           ) : error ? (
-            <p className="text-sm text-red-500">Error al cargar</p>
+            <p className={`text-sm ${theme.errorText}`}>Error al cargar</p>
           ) : (
-            <p className="text-2xl font-bold text-gray-800">{value.toFixed(2)} Bs</p>
+            <p className={`text-2xl font-bold ${theme.cardTextBold}`}>{value.toFixed(2)} Bs</p>
           )}
         </div>
         <Icon className={`h-8 w-8 ${accentColor.replace('bg-', 'text-')}`} />
@@ -46,10 +59,10 @@ const Dashboard: React.FC = () => {
   );
 
   return (
-    <div className="dashboard bg-gray-100 p-6 min-h-screen">
+    <div className={`dashboard ${theme.background} ${theme.text} p-6 min-h-screen`}>
       {/* Sección: Tasas del Dólar */}
       <section className="mb-10">
-        <h2 className="text-2xl font-semibold text-gray-800 mb-4">Tasas del Dólar</h2>
+        <h2 className={`text-2xl font-semibold ${theme.accentText} mb-4`}>Tasas del Dólar</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           <ExchangeRateCard title="Paralelo" value={exchangeRates.paralelo} icon={DollarSign} accentColor="bg-blue-500" />
           <ExchangeRateCard title="Banco Central" value={exchangeRates.oficial} icon={DollarSign} accentColor="bg-green-500" />
@@ -57,21 +70,21 @@ const Dashboard: React.FC = () => {
           <ExchangeRateCard title="Promedio" value={exchangeRates.promedio} icon={DollarSign} accentColor="bg-purple-500" />
         </div>
         {error ? (
-          <p className="text-sm text-red-500 mt-2">Error de red: No se pudo obtener las tasas</p>
+          <p className={`text-sm ${theme.errorText} mt-2`}>Error de red: No se pudo obtener las tasas</p>
         ) : (
-          <p className="text-sm text-gray-600 mt-2">Última actualización: {exchangeRates.fechaActualizacion}</p>
+          <p className={`text-sm ${theme.mutedText} mt-2`}>Última actualización: {exchangeRates.fechaActualizacion}</p>
         )}
       </section>
 
       {/* Sección: Facturación del Día */}
       <section className="mb-10">
-        <h2 className="text-2xl font-semibold text-gray-800 mb-4">Facturación del Día</h2>
+        <h2 className={`text-2xl font-semibold ${theme.accentText} mb-4`}>Facturación del Día</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <CardWrapper accentColor="bg-emerald-500">
             <div className="flex justify-between items-center">
               <div>
-                <p className="text-sm font-medium text-gray-500">Cantidad en caja (Bs)</p>
-                <p className="text-2xl font-bold text-gray-800">{cashInRegister.bolivares.toFixed(2)} Bs</p>
+                <p className={`text-sm font-medium ${theme.mutedText}`}>Cantidad en caja (Bs)</p>
+                <p className={`text-2xl font-bold ${theme.cardTextBold}`}>{cashInRegister.bolivares.toFixed(2)} Bs</p>
               </div>
               <DollarSign className="h-8 w-8 text-emerald-500" />
             </div>
@@ -79,8 +92,8 @@ const Dashboard: React.FC = () => {
           <CardWrapper accentColor="bg-sky-500">
             <div className="flex justify-between items-center">
               <div>
-                <p className="text-sm font-medium text-gray-500">Cantidad en caja ($)</p>
-                <p className="text-2xl font-bold text-gray-800">${cashInRegister.dolares.toFixed(2)}</p>
+                <p className={`text-sm font-medium ${theme.mutedText}`}>Cantidad en caja ($)</p>
+                <p className={`text-2xl font-bold ${theme.cardTextBold}`}>${cashInRegister.dolares.toFixed(2)}</p>
               </div>
               <DollarSign className="h-8 w-8 text-sky-500" />
             </div>
@@ -90,39 +103,39 @@ const Dashboard: React.FC = () => {
 
       {/* Sección: Inventario y Ventas */}
       <section className="mb-10">
-        <h2 className="text-2xl font-semibold text-gray-800 mb-4">Inventario y Ventas</h2>
+        <h2 className={`text-2xl font-semibold ${theme.accentText} mb-4`}>Inventario y Ventas</h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <CardWrapper accentColor="bg-indigo-500">
             <div className="flex justify-between items-center mb-4">
-              <p className="text-sm font-medium text-gray-500">Total de productos vendidos</p>
+              <p className={`text-sm font-medium ${theme.mutedText}`}>Total de productos vendidos</p>
               <ShoppingCart className="h-6 w-6 text-indigo-500" />
             </div>
-            <p className="text-3xl font-bold text-gray-800">{totalProductsSold}</p>
+            <p className={`text-3xl font-bold ${theme.cardTextBold}`}>{totalProductsSold}</p>
           </CardWrapper>
           <CardWrapper accentColor="bg-teal-500" className="h-full">
             <div className="flex justify-between items-center mb-4">
-              <p className="text-sm font-medium text-gray-500">Productos más vendidos</p>
+              <p className={`text-sm font-medium ${theme.mutedText}`}>Productos más vendidos</p>
               <TrendingUp className="h-6 w-6 text-teal-500" />
             </div>
             <ul className="space-y-2">
               {topSellingProducts.map((product, index) => (
                 <li key={index} className="flex justify-between">
-                  <span className="text-gray-700">{product.nombre}</span>
-                  <span className="font-semibold text-gray-800">{product.ventas} ventas</span>
+                  <span className={theme.cardText}>{product.nombre}</span>
+                  <span className={`font-semibold ${theme.cardTextBold}`}>{product.ventas} ventas</span>
                 </li>
               ))}
             </ul>
           </CardWrapper>
           <CardWrapper accentColor="bg-amber-500" className="h-full">
             <div className="flex justify-between items-center mb-4">
-              <p className="text-sm font-medium text-gray-500">Productos con poco stock</p>
+              <p className={`text-sm font-medium ${theme.mutedText}`}>Productos con poco stock</p>
               <AlertTriangle className="h-6 w-6 text-amber-500" />
             </div>
             <ul className="space-y-2">
               {lowStockProducts.map((product, index) => (
                 <li key={index} className="flex justify-between">
-                  <span className="text-gray-700">{product.nombre}</span>
-                  <span className="font-semibold text-gray-800">Stock: {product.stock}</span>
+                  <span className={theme.cardText}>{product.nombre}</span>
+                  <span className={`font-semibold ${theme.cardTextBold}`}>Stock: {product.stock}</span>
                 </li>
               ))}
             </ul>
@@ -132,7 +145,7 @@ const Dashboard: React.FC = () => {
 
       {/* Información Crucial */}
       <section className="mb-10">
-        <h2 className="text-2xl font-semibold text-gray-800 mb-4">Información Crucial</h2>
+        <h2 className={`text-2xl font-semibold ${theme.accentText} mb-4`}>Información Crucial</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {[
             { title: 'Ventas del día', value: dailyStats.ventas, diff: dailyStats.ventasDiff, icon: ShoppingBag, accentColor: 'bg-blue-500' },
@@ -142,13 +155,13 @@ const Dashboard: React.FC = () => {
           ].map((stat, index) => (
             <CardWrapper key={index} accentColor={stat.accentColor}>
               <div className="flex justify-between items-center mb-2">
-                <p className="text-sm font-medium text-gray-500">{stat.title}</p>
+                <p className={`text-sm font-medium ${theme.mutedText}`}>{stat.title}</p>
                 <stat.icon className={`h-6 w-6 ${stat.accentColor.replace('bg-', 'text-')}`} />
               </div>
-              <p className="text-2xl font-bold text-gray-800">
+              <p className={`text-2xl font-bold ${theme.cardTextBold}`}>
                 {stat.title.includes('Ventas') || stat.title.includes('Ganancia') ? `$${stat.value.toFixed(2)}` : stat.value}
               </p>
-              <p className={`text-sm ${stat.diff >= 0 ? 'text-green-600' : 'text-red-600'} flex items-center mt-2`}>
+              <p className={`text-sm ${stat.diff >= 0 ? 'text-green-500' : 'text-red-500'} flex items-center mt-2`}>
                 {stat.diff >= 0 ? <ArrowUpRight className="h-4 w-4 mr-1" /> : <ArrowDownRight className="h-4 w-4 mr-1" />}
                 {Math.abs(stat.diff).toFixed(2)}% vs ayer
               </p>

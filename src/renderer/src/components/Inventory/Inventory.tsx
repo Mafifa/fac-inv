@@ -7,7 +7,8 @@ import ModalOferta from './modalOferta';
 import BarraBusqueda from './barraBusqueda';
 
 const Inventario: React.FC = () => {
-  const { getTasaCambio } = useAppContext()
+  const { getTasaCambio, config } = useAppContext()
+  const isDarkMode = config.modoOscuro;
 
   const {
     productos,
@@ -57,11 +58,14 @@ const Inventario: React.FC = () => {
 
   if (error) {
     return (
-      <div className="flex flex-col items-center justify-center h-screen bg-gray-100">
-        <p className="text-red-600 text-xl mb-4">{error}</p>
+      <div className={`flex flex-col items-center justify-center h-screen ${isDarkMode ? 'bg-gray-900 text-white' : 'bg-gray-100 text-gray-900'}`}>
+        <p className={`text-xl mb-4 ${isDarkMode ? 'text-red-400' : 'text-red-600'}`}>{error}</p>
         <button
           onClick={() => setPaginaActual(1)}
-          className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition duration-300 shadow-lg"
+          className={`px-6 py-2 rounded-lg transition duration-300 shadow-lg ${isDarkMode
+            ? 'bg-blue-600 text-white hover:bg-blue-700'
+            : 'bg-blue-600 text-white hover:bg-blue-700'
+            }`}
         >
           Reintentar
         </button>
@@ -70,14 +74,17 @@ const Inventario: React.FC = () => {
   }
 
   return (
-    <div className="inventario bg-gray-100 px-6 -mt-1">
+    <div className={`inventario px-6 -mt-1 ${isDarkMode ? 'bg-gray-900 text-white' : 'bg-gray-100 text-gray-900'}`}>
       <div className="max-w-7xl mx-auto">
         <div className="mb-8 flex flex-col sm:flex-row justify-between items-center space-y-4 sm:space-y-0">
           <div className="flex items-center space-x-4">
-            <BarraBusqueda onSearch={handleSearch} initialValue={busqueda} />
+            <BarraBusqueda onSearch={handleSearch} initialValue={busqueda} isDarkMode={isDarkMode} />
             <button
               onClick={() => setModalAbierto(true)}
-              className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition duration-300 shadow-md flex items-center"
+              className={`px-4 py-2 rounded-lg transition duration-300 shadow-md flex items-center ${isDarkMode
+                ? 'bg-blue-600 text-white hover:bg-blue-700'
+                : 'bg-blue-600 text-white hover:bg-blue-700'
+                }`}
             >
               <Plus className="h-5 w-5 mr-2" />
               Agregar Producto
@@ -87,31 +94,33 @@ const Inventario: React.FC = () => {
 
         {isLoading ? (
           <div className="flex justify-center items-center h-64">
-            <Loader className="animate-spin h-12 w-12 text-blue-600" />
+            <Loader className={`animate-spin h-12 w-12 ${isDarkMode ? 'text-blue-400' : 'text-blue-600'}`} />
           </div>
         ) : (
           <>
-            <div className="bg-white shadow-lg rounded-lg overflow-hidden">
+            <div className={`shadow-lg rounded-lg overflow-hidden ${isDarkMode ? 'bg-gray-800' : 'bg-white'}`}>
               <div className="overflow-x-auto">
                 <table className="min-w-full divide-y divide-gray-200">
-                  <thead className="bg-gray-50">
+                  <thead className={isDarkMode ? 'bg-gray-700' : 'bg-gray-50'}>
                     <tr>
                       {['ID', 'Nombre', 'Precio (USD)', 'Precio (Bs)', 'Stock', 'Descuento', 'Acciones'].map((header) => (
-                        <th key={header} className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        <th key={header} className={`px-6 py-3 text-left text-xs font-medium uppercase tracking-wider ${isDarkMode ? 'text-gray-300' : 'text-gray-500'
+                          }`}>
                           {header}
                         </th>
                       ))}
                     </tr>
                   </thead>
-                  <tbody className="bg-white divide-y divide-gray-200">
+                  <tbody className={`divide-y ${isDarkMode ? 'divide-gray-700' : 'divide-gray-200'}`}>
                     {productos.map((producto) => (
-                      <tr key={producto.id_producto} className="hover:bg-gray-50 transition duration-150 ease-in-out">
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{producto.id_producto}</td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{producto.nombre}</td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${producto.precio_base.toFixed(2)}</td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{(producto.precio_base * getTasaCambio("inventario")).toFixed(2)} Bs</td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{producto.stock}</td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      <tr key={producto.id_producto} className={`transition duration-150 ease-in-out ${isDarkMode ? 'hover:bg-gray-700' : 'hover:bg-gray-50'
+                        }`}>
+                        <td className={`px-6 py-4 whitespace-nowrap text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-500'}`}>{producto.id_producto}</td>
+                        <td className={`px-6 py-4 whitespace-nowrap text-sm font-medium ${isDarkMode ? 'text-gray-100' : 'text-gray-900'}`}>{producto.nombre}</td>
+                        <td className={`px-6 py-4 whitespace-nowrap text-sm ${isDarkMode ? 'text-gray-100' : 'text-gray-900'}`}>${producto.precio_base.toFixed(2)}</td>
+                        <td className={`px-6 py-4 whitespace-nowrap text-sm ${isDarkMode ? 'text-gray-100' : 'text-gray-900'}`}>{(producto.precio_base * getTasaCambio("inventario")).toFixed(2)} Bs</td>
+                        <td className={`px-6 py-4 whitespace-nowrap text-sm ${isDarkMode ? 'text-gray-100' : 'text-gray-900'}`}>{producto.stock}</td>
+                        <td className={`px-6 py-4 whitespace-nowrap text-sm ${isDarkMode ? 'text-gray-100' : 'text-gray-900'}`}>
                           {producto.descuento ? `${producto.descuento.toFixed(2)}%` : '-'}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
@@ -121,21 +130,24 @@ const Inventario: React.FC = () => {
                                 setProductoEditando(producto);
                                 setModalAbierto(true);
                               }}
-                              className="text-blue-600 hover:text-blue-900 transition duration-150 ease-in-out"
+                              className={`transition duration-150 ease-in-out ${isDarkMode ? 'text-blue-400 hover:text-blue-300' : 'text-blue-600 hover:text-blue-900'
+                                }`}
                               title="Editar"
                             >
                               <Pencil className="h-5 w-5" />
                             </button>
                             <button
                               onClick={() => handleDisableProducto(producto.id_producto)}
-                              className="text-yellow-600 hover:text-yellow-900 transition duration-150 ease-in-out"
+                              className={`transition duration-150 ease-in-out ${isDarkMode ? 'text-yellow-400 hover:text-yellow-300' : 'text-yellow-600 hover:text-yellow-900'
+                                }`}
                               title="Deshabilitar"
                             >
                               <EyeOff className="h-5 w-5" />
                             </button>
                             <button
                               onClick={() => handleDeleteProducto(producto.id_producto)}
-                              className="text-red-600 hover:text-red-900 transition duration-150 ease-in-out"
+                              className={`transition duration-150 ease-in-out ${isDarkMode ? 'text-red-400 hover:text-red-300' : 'text-red-600 hover:text-red-900'
+                                }`}
                               title="Eliminar"
                             >
                               <Trash2 className="h-5 w-5" />
@@ -145,7 +157,8 @@ const Inventario: React.FC = () => {
                                 setProductoOferta(producto);
                                 setModalOfertaAbierto(true);
                               }}
-                              className="text-green-600 hover:text-green-900 transition duration-150 ease-in-out"
+                              className={`transition duration-150 ease-in-out ${isDarkMode ? 'text-green-400 hover:text-green-300' : 'text-green-600 hover:text-green-900'
+                                }`}
                               title="Oferta"
                             >
                               <Tag className="h-5 w-5" />
@@ -162,18 +175,24 @@ const Inventario: React.FC = () => {
               <button
                 onClick={() => setPaginaActual(Math.max(paginaActual - 1, 1))}
                 disabled={paginaActual === 1}
-                className="flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                className={`flex items-center px-4 py-2 border text-sm font-medium rounded-md ${isDarkMode
+                  ? 'border-gray-600 text-gray-300 bg-gray-800 hover:bg-gray-700'
+                  : 'border-gray-300 text-gray-700 bg-white hover:bg-gray-50'
+                  } disabled:opacity-50 disabled:cursor-not-allowed`}
               >
                 <ChevronLeft className="h-5 w-5 mr-2" />
                 Anterior
               </button>
-              <span className="text-sm text-gray-700">
+              <span className={`text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
                 Página {paginaActual} de {totalPaginas}
               </span>
               <button
                 onClick={() => setPaginaActual(Math.min(paginaActual + 1, totalPaginas))}
                 disabled={paginaActual === totalPaginas}
-                className="flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                className={`flex items-center px-4 py-2 border text-sm font-medium rounded-md ${isDarkMode
+                  ? 'border-gray-600 text-gray-300 bg-gray-800 hover:bg-gray-700'
+                  : 'border-gray-300 text-gray-700 bg-white hover:bg-gray-50'
+                  } disabled:opacity-50 disabled:cursor-not-allowed`}
               >
                 Siguiente
                 <ChevronRight className="h-5 w-5 ml-2" />
@@ -190,6 +209,7 @@ const Inventario: React.FC = () => {
         }}
         onSave={productoEditando ? handleUpdateProducto : handleAddProducto}
         producto={productoEditando}
+        isDarkMode={isDarkMode}
       />
       <ModalOferta
         isOpen={modalOfertaAbierto}
@@ -199,6 +219,7 @@ const Inventario: React.FC = () => {
         }}
         producto={productoOferta}
         onSave={handleUpdateProducto}
+        isDarkMode={isDarkMode}
       />
     </div>
   );

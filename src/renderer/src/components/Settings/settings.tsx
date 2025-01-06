@@ -160,18 +160,6 @@ const Configuracion: React.FC<ConfiguracionProps> = ({ onClose, onModoOscuroChan
             </div>
 
             <div className="space-y-6">
-              <ConfigSection
-                title="Modalidad de Pago"
-                icon={<CreditCard className="h-6 w-6 text-indigo-500" />}
-              >
-                <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Modalidad Bolívar Paralelo</span>
-                  <Toggle
-                    enabled={config.modalidadBolivarParalelo}
-                    onChange={(value) => handleChange('modalidadBolivarParalelo', value)}
-                  />
-                </div>
-              </ConfigSection>
 
               <ConfigSection
                 title="Preferencias de Idioma"
