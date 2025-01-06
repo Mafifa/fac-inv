@@ -1,6 +1,6 @@
 {
   "name": "vendible",
-  "version": "1.0.0",
+  "version": "1.0.3",
   "description": "Sistema de facturacion desarrollado por DASCA",
   "main": "./out/main/index.js",
   "author": "Carlos Mafifa",
@@ -25,8 +25,9 @@
     "@electron-toolkit/preload": "3.0.1",
     "@electron-toolkit/utils": "3.0.0",
     "@fontsource-variable/nunito": "5.1.0",
-    "lucide-react": "0.438.0",
     "electron-store": "8.2.0",
+    "electron-updater": "6.3.9",
+    "lucide-react": "0.438.0",
     "recharts": "2.12.7",
     "sonner": "1.5.0",
     "sqlite": "5.0.1",
@@ -55,8 +56,8 @@
     "vite": "5.3.1"
   },
   "build": {
-    "appId": "com.example.facturacion-maff",
-    "productName": "Facturacion e Inventario",
+    "appId": "com.vendible.facturacionMaff",
+    "productName": "VENDIBLE",
     "directories": {
       "output": "dist"
     },
@@ -66,7 +67,17 @@
       "node_modules/**/*",
       "package.json"
     ],
+    "publish": {
+      "provider": "github",
+      "owner": "RaquelCurapa",
+      "repo": "fac-inv"
+    },
     "win": {
+      "publish": {
+        "provider": "github",
+        "owner": "RaquelCurapa",
+        "repo": "fac-inv"
+      },
       "target": [
         {
           "target": "nsis",

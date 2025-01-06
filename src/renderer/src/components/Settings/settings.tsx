@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { X, DollarSign, Globe, Moon, Sun, Percent, CreditCard } from 'lucide-react';
+import { X, DollarSign, Globe, Moon, Sun, Percent } from 'lucide-react';
 
 interface ConfiguracionProps {
   onClose: () => void;

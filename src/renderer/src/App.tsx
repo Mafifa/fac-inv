@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Toaster } from 'sonner';
 import Dashboard from './components/Dashboard/dashboard';
-import Inventario from './components/Inventory/Inventory';
+import Inventario from './components/Inventory/inventory';
 import Ventas from './components/Sales/sales';
 import Analisis from './components/Analysis/analysis';
 import Historial from './components/History/history';
@@ -45,7 +45,7 @@ const App: React.FC = () => {
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
               <div className="flex justify-between items-center h-16">
                 <div className="flex items-center">
-                  <h1 className={`text-2xl font-bold ${modoOscuro ? 'text-blue-400' : 'text-blue-600'} tracking-tight`}>VENDIBLE</h1>
+                  <h1 className={`text-2xl font-bold ${modoOscuro ? 'text-blue-400' : 'text-blue-600'} tracking-tight`}>VENDIBLE 1.0.3</h1>
                 </div>
                 <div className="flex items-center space-x-1">
                   {tabs.map((tab) => (
