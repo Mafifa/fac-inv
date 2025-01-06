@@ -74,7 +74,7 @@ const SaleDetailModal: React.FC<SaleDetailModalProps> = ({ isOpen, onClose, sale
               </div>
               <div>
                 <p className="text-sm font-medium text-gray-500">Método de Pago</p>
-                <p className="text-lg text-gray-900">{saleDetails.metodo_pago}</p>
+                <p className="text-lg text-gray-900">{saleDetails.metodo_pago.toUpperCase()}</p>
               </div>
               <div>
                 <p className="text-sm font-medium text-gray-500">Tasa del Dólar</p>
@@ -82,7 +82,7 @@ const SaleDetailModal: React.FC<SaleDetailModalProps> = ({ isOpen, onClose, sale
               </div>
               <div>
                 <p className="text-sm font-medium text-gray-500">Monto</p>
-                <p className="text-lg text-gray-900">{saleDetails.monto} {saleDetails.moneda_cambio}</p>
+                <p className="text-lg text-gray-900">{saleDetails.monto.toFixed(2)} {saleDetails.moneda_cambio}</p>
               </div>
             </div>
             <div>

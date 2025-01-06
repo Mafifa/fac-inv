@@ -112,7 +112,7 @@ const History: React.FC = () => {
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{sale.id_venta}</td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{formatDate(sale.fecha_venta)}</td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${sale.total.toFixed(2)}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{sale.metodo_pago}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{sale.metodo_pago.toUpperCase()}</td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{sale.tasa_dolar.toFixed(2)}</td>
                   </tr>
                 ))
