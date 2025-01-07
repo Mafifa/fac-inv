@@ -14,7 +14,9 @@ const Dashboard: React.FC = () => {
   }: DashboardData & { exchangeRates: ExchangeRates, dailyStats: DailyStats } = useDashboard();
 
   const { isLoading, error, config } = useAppContext();
+
   const isDarkMode = config.modoOscuro;
+  console.log('modo oscuro:', isDarkMode);
 
   const theme = {
     background: isDarkMode ? 'bg-gray-900' : 'bg-gray-100',
@@ -59,7 +61,7 @@ const Dashboard: React.FC = () => {
   );
 
   return (
-    <div className={`dashboard ${theme.background} ${theme.text} p-6 min-h-screen`}>
+    <div className={`dashboard ${theme.background} ${theme.text} px-6 min-h-screen`}>
       {/* Sección: Tasas del Dólar */}
       <section className="mb-10">
         <h2 className={`text-2xl font-semibold ${theme.accentText} mb-4`}>Tasas del Dólar</h2>

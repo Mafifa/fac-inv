@@ -74,14 +74,14 @@ const Inventario: React.FC = () => {
   }
 
   return (
-    <div className={`inventario px-6 -mt-1 ${isDarkMode ? 'bg-gray-900 text-white' : 'bg-gray-100 text-gray-900'}`}>
+    <div className={`inventario px-6 -mt-1 ${isDarkMode ? 'bg-gray-900 text-white' : 'bg-gray-100   text-gray-900'}`}>
       <div className="max-w-7xl mx-auto">
         <div className="mb-8 flex flex-col sm:flex-row justify-between items-center space-y-4 sm:space-y-0">
           <div className="flex items-center space-x-4">
             <BarraBusqueda onSearch={handleSearch} initialValue={busqueda} isDarkMode={isDarkMode} />
             <button
               onClick={() => setModalAbierto(true)}
-              className={`px-4 py-2 rounded-lg transition duration-300 shadow-md flex items-center ${isDarkMode
+              className={`px-4 py-2 whitespace-nowrap rounded-lg transition duration-300 shadow-md flex items-center ${isDarkMode
                 ? 'bg-blue-600 text-white hover:bg-blue-700'
                 : 'bg-blue-600 text-white hover:bg-blue-700'
                 }`}

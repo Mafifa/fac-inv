@@ -109,9 +109,8 @@ const Analysis: React.FC = () => {
   };
 
   return (
-    <div className={`analysis p-6 ${isDarkMode ? 'bg-gray-900 text-gray-100' : 'bg-gray-100 text-gray-900'}`}>
-      <div className="flex justify-between items-center mb-6">
-        <h1 className={`text-3xl font-semibold ${theme.title}`}>Análisis</h1>
+    <div className={`analysis px-6 ${isDarkMode ? 'bg-gray-900 text-gray-100' : 'bg-gray-100 text-gray-900'}`}>
+      <div className="flex justify-between items-center mb-2">
         <button
           onClick={refreshData}
           className={`px-4 py-2 rounded transition duration-300 ${isDarkMode

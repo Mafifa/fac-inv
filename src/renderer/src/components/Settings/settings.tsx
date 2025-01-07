@@ -1,9 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { X, DollarSign, Globe, Moon, Sun, Percent } from 'lucide-react';
+import { useConfig } from './useSettings';
 
 interface ConfiguracionProps {
   onClose: () => void;
-  onModoOscuroChange: (value: boolean) => void;
 }
 
 interface Config {
@@ -16,38 +16,11 @@ interface Config {
   modoOscuro: boolean;
 }
 
-const Configuracion: React.FC<ConfiguracionProps> = ({ onClose, onModoOscuroChange }) => {
-  const [config, setConfig] = useState<Config>({
-    tasaCambioInventario: '',
-    tasaPersonalizadaInventario: null,
-    tasaCambioFacturacion: '',
-    tasaPersonalizadaFacturacion: null,
-    modalidadBolivarParalelo: false,
-    idioma: 'es',
-    modoOscuro: false,
-  });
-
-  useEffect(() => {
-    const loadConfig = async () => {
-      const savedConfig = localStorage.getItem('appConfig');
-      if (savedConfig) {
-        setConfig(JSON.parse(savedConfig));
-      } else {
-        const allConfig = await window.electron.ipcRenderer.invoke('get-all-config');
-        setConfig(allConfig);
-      }
-    };
-    loadConfig();
-  }, []);
+const Configuracion: React.FC<ConfiguracionProps> = ({ onClose }) => {
+  const { updateConfig, config } = useConfig()
 
   const handleChange = async (key: keyof Config, value: any) => {
-    const newConfig = { ...config, [key]: value };
-    setConfig(newConfig);
-    await window.electron.ipcRenderer.invoke('set-config', key, value);
-    localStorage.setItem('appConfig', JSON.stringify(newConfig));
-    if (key === 'modoOscuro') {
-      onModoOscuroChange(value);
-    }
+    updateConfig(key, value)
   };
 
   return (

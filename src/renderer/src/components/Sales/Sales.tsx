@@ -1,5 +1,6 @@
 import React, { useState, useCallback } from 'react';
-import { useVentas } from './useSales';
+import { useSales, Producto } from './useSales';
+import { useCart, CartItem } from './useCart';
 import { useAppContext } from '../../context/appContext';
 import { toast } from 'sonner';
 import { Search, ShoppingCart, Plus, Minus, X } from 'lucide-react';
@@ -9,34 +10,37 @@ const Ventas: React.FC = () => {
   const isDarkMode = config.modoOscuro;
   const {
     productos,
-    carrito,
     paginaActual,
     totalPaginas,
     filtroBusqueda,
     buscarProductos,
+    cambiarPagina
+  } = useSales();
+
+  const {
+    carrito,
     agregarAlCarrito,
     actualizarCantidadCarrito,
-    realizarVenta,
-    registrarPago,
     limpiarCarrito,
-    cambiarPagina
-  } = useVentas();
+    calcularTotal
+  } = useCart();
 
   const [modalPagoVisible, setModalPagoVisible] = useState(false);
   const [metodoPago, setMetodoPago] = useState<'efectivo' | 'dolares' | 'transferencia' | 'punto'>('efectivo');
   const [montoPagado, setMontoPagado] = useState('');
   const [ventaActual, setVentaActual] = useState<number | null>(null);
 
-  const calcularTotal = useCallback(() => {
-    return carrito.reduce((total, item) => {
-      const producto = productos.find(p => p.id_producto === item.id);
-      return total + (producto ? producto.precio_base * item.cantidad : 0);
-    }, 0);
-  }, [carrito, productos]);
-
   const handleBusqueda = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     buscarProductos(e.target.value);
   }, [buscarProductos]);
+
+  const handleAgregarAlCarrito = useCallback((producto: Producto) => {
+    agregarAlCarrito({
+      id: producto.id_producto,
+      nombre: producto.nombre,
+      precio_base: producto.precio_base
+    });
+  }, [agregarAlCarrito]);
 
   const handleRealizarVenta = useCallback(async () => {
     if (carrito.length === 0) {
@@ -44,13 +48,18 @@ const Ventas: React.FC = () => {
       return;
     }
     try {
-      const idVenta = await realizarVenta(carrito, getTasaCambio('facturacion'));
+      const ventaData = carrito.map(item => ({ id: item.id, cantidad: item.cantidad }));
+      const idVenta = await window.electron.ipcRenderer.invoke(
+        'realizar-venta',
+        ventaData,
+        getTasaCambio('facturacion')
+      );
       setVentaActual(idVenta);
       setModalPagoVisible(true);
     } catch (error) {
       toast.error('Error al realizar la venta');
     }
-  }, [carrito, realizarVenta, getTasaCambio]);
+  }, [carrito, getTasaCambio]);
 
   const handlePago = useCallback(async () => {
     if (!ventaActual) {
@@ -80,7 +89,13 @@ const Ventas: React.FC = () => {
     }
 
     try {
-      await registrarPago(ventaActual, metodoPago, montoFinal, monedaCambio);
+      await window.electron.ipcRenderer.invoke(
+        'registrar-pago',
+        ventaActual,
+        metodoPago,
+        montoFinal,
+        monedaCambio
+      );
       toast.success('Pago registrado con éxito');
       setModalPagoVisible(false);
       setMontoPagado('');
@@ -89,7 +104,7 @@ const Ventas: React.FC = () => {
     } catch (error) {
       toast.error('Error al registrar el pago');
     }
-  }, [ventaActual, calcularTotal, metodoPago, montoPagado, getTasaCambio, registrarPago, limpiarCarrito]);
+  }, [ventaActual, calcularTotal, metodoPago, montoPagado, getTasaCambio, limpiarCarrito]);
 
   const calcularCambio = useCallback(() => {
     const total = calcularTotal();
@@ -141,7 +156,7 @@ const Ventas: React.FC = () => {
                   </div>
                 </div>
                 <button
-                  onClick={() => agregarAlCarrito(producto.id_producto)}
+                  onClick={() => handleAgregarAlCarrito(producto)}
                   className="bg-blue-500 text-white px-3 py-2 rounded-lg hover:bg-blue-600 transition duration-150 ease-in-out flex items-center"
                 >
                   <Plus size={18} className="mr-1" />
@@ -180,36 +195,33 @@ const Ventas: React.FC = () => {
             <ShoppingCart className="mr-2" /> Carrito
           </h2>
           <div className="h-[calc(100vh-400px)] overflow-y-auto mb-4">
-            {carrito.map(item => {
-              const producto = productos.find(p => p.id_producto === item.id);
-              return producto ? (
-                <div key={item.id} className={`flex justify-between items-center mb-4 p-3 rounded-lg ${isDarkMode ? 'bg-gray-700' : 'bg-gray-50'
-                  }`}>
-                  <div>
-                    <div className={`font-semibold ${isDarkMode ? 'text-gray-100' : 'text-gray-800'}`}>{producto.nombre}</div>
-                    <div className={`text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
-                      ${(producto.precio_base * item.cantidad).toFixed(2)} /
-                      {(producto.precio_base * item.cantidad * getTasaCambio('facturacion')).toFixed(2)} Bs
-                    </div>
-                  </div>
-                  <div className="flex items-center">
-                    <button
-                      onClick={() => actualizarCantidadCarrito(item.id, item.cantidad - 1)}
-                      className="bg-red-500 text-white p-1 rounded-full hover:bg-red-600 transition duration-150 ease-in-out"
-                    >
-                      <Minus size={18} />
-                    </button>
-                    <span className={`mx-3 font-semibold ${isDarkMode ? 'text-gray-100' : 'text-gray-800'}`}>{item.cantidad}</span>
-                    <button
-                      onClick={() => actualizarCantidadCarrito(item.id, item.cantidad + 1)}
-                      className="bg-green-500 text-white p-1 rounded-full hover:bg-green-600 transition duration-150 ease-in-out"
-                    >
-                      <Plus size={18} />
-                    </button>
+            {carrito.map((item: CartItem) => (
+              <div key={item.id} className={`flex justify-between items-center mb-4 p-3 rounded-lg ${isDarkMode ? 'bg-gray-700' : 'bg-gray-50'
+                }`}>
+                <div>
+                  <div className={`font-semibold ${isDarkMode ? 'text-gray-100' : 'text-gray-800'}`}>{item.nombre}</div>
+                  <div className={`text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
+                    ${(item.precio_base * item.cantidad).toFixed(2)} /
+                    {(item.precio_base * item.cantidad * getTasaCambio('facturacion')).toFixed(2)} Bs
                   </div>
                 </div>
-              ) : null;
-            })}
+                <div className="flex items-center">
+                  <button
+                    onClick={() => actualizarCantidadCarrito(item.id, item.cantidad - 1)}
+                    className="bg-red-500 text-white p-1 rounded-full hover:bg-red-600 transition duration-150 ease-in-out"
+                  >
+                    <Minus size={18} />
+                  </button>
+                  <span className={`mx-3 font-semibold ${isDarkMode ? 'text-gray-100' : 'text-gray-800'}`}>{item.cantidad}</span>
+                  <button
+                    onClick={() => actualizarCantidadCarrito(item.id, item.cantidad + 1)}
+                    className="bg-green-500 text-white p-1 rounded-full hover:bg-green-600 transition duration-150 ease-in-out"
+                  >
+                    <Plus size={18} />
+                  </button>
+                </div>
+              </div>
+            ))}
           </div>
           <div className={`border-t pt-4 ${isDarkMode ? 'border-gray-700' : 'border-gray-200'}`}>
             <div className={`text-2xl font-bold mb-4 ${isDarkMode ? 'text-gray-100' : 'text-gray-800'}`}>
