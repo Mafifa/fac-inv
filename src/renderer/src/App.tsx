@@ -10,63 +10,35 @@ import UpdateModal from './components/updateModal'
 import { Home, Package, ShoppingCart, BarChart2, History, Settings } from 'lucide-react'
 import { useAppContext } from './context/appContext'
 
-// Define types for the update info and progress
 interface UpdateInfo {
   version: string
   releaseDate: string
   files: { size: number }[]
 }
-
-interface ProgressInfo {
-  percent: number
-  bytesPerSecond: number
-}
+// interface ProgressInfo {
+//   percent: number
+//   bytesPerSecond: number
+// }
 
 const App: React.FC = () => {
   const [activeTab, setActiveTab] = useState('dashboard')
   const [isSettingsOpen, setIsSettingsOpen] = useState(false)
   const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false)
   const [updateInfo, setUpdateInfo] = useState<UpdateInfo | null>(null)
-  const [downloadProgress, setDownloadProgress] = useState(0)
-  const [downloadSpeed, setDownloadSpeed] = useState(0)
-  const [isDownloading, setIsDownloading] = useState(false)
-  const [isUpdateDownloaded, setIsUpdateDownloaded] = useState(false)
+
+  useEffect(() => {
+    // Escuchar el evento 'update-available' desde el preload
+    window.api.onUpdateAvailable((info: UpdateInfo) => {
+      setUpdateInfo(info)
+      if (updateInfo) {
+        setIsUpdateModalOpen(true)
+      }
+    })
+  }, [])
 
   const { config } = useAppContext()
 
   const modoOscuro = config.modoOscuro
-
-  useEffect(() => {
-    // Set up listeners for update events
-    window.electron.ipcRenderer.on('update-available', (_event: Electron.IpcRendererEvent, info: UpdateInfo) => {
-      setUpdateInfo(info)
-      setIsUpdateModalOpen(true)
-    })
-
-    window.electron.ipcRenderer.on('download-progress', (_event: Electron.IpcRendererEvent, progressObj: ProgressInfo) => {
-      setDownloadProgress(progressObj.percent)
-      setDownloadSpeed(progressObj.bytesPerSecond)
-      setIsDownloading(true)
-    })
-
-    window.electron.ipcRenderer.on('update-downloaded', () => {
-      setIsDownloading(false)
-      setIsUpdateDownloaded(true)
-    })
-
-    window.electron.ipcRenderer.on('update-error', (_event: Electron.IpcRendererEvent, error: string) => {
-      console.error('Update error:', error)
-      // You might want to show an error message to the user here
-    })
-
-    // Clean up listeners
-    return () => {
-      window.electron.ipcRenderer.removeAllListeners('update-available')
-      window.electron.ipcRenderer.removeAllListeners('download-progress')
-      window.electron.ipcRenderer.removeAllListeners('update-downloaded')
-      window.electron.ipcRenderer.removeAllListeners('update-error')
-    }
-  }, [])
 
   const tabs = [
     { id: 'dashboard', name: 'Dashboard', icon: Home },
@@ -76,13 +48,13 @@ const App: React.FC = () => {
     { id: 'analisis', name: 'Análisis', icon: BarChart2 }
   ]
 
-  const handleStartDownload = () => {
-    window.electron.ipcRenderer.invoke('start-download')
-  }
+  // const handleStartDownload = () => {
+  //   window.electron.ipcRenderer.invoke('start-download')
+  // }
 
-  const handleInstallUpdate = () => {
-    window.electron.ipcRenderer.invoke('quit-and-install')
-  }
+  // const handleInstallUpdate = () => {
+  //   window.electron.ipcRenderer.invoke('quit-and-install')
+  // }
 
   return (
     <div className={`flex flex-col h-screen ${modoOscuro ? 'dark' : ''}`}>
@@ -144,12 +116,6 @@ const App: React.FC = () => {
           isOpen={isUpdateModalOpen}
           onClose={() => setIsUpdateModalOpen(false)}
           updateInfo={updateInfo}
-          downloadProgress={downloadProgress}
-          downloadSpeed={downloadSpeed}
-          isDownloading={isDownloading}
-          isUpdateDownloaded={isUpdateDownloaded}
-          onStartDownload={handleStartDownload}
-          onInstallUpdate={handleInstallUpdate}
         />
       </div>
     </div>

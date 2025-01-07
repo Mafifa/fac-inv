@@ -69,13 +69,13 @@
     ],
     "publish": {
       "provider": "github",
-      "owner": "RaquelCurapa",
+      "owner": "Mafifa",
       "repo": "fac-inv"
     },
     "win": {
       "publish": {
         "provider": "github",
-        "owner": "RaquelCurapa",
+        "owner": "Mafifa",
         "repo": "fac-inv"
       },
       "target": [
