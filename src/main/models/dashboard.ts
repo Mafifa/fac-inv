@@ -27,12 +27,13 @@ export async function getDashboardData(): Promise<DashboardData> {
   `)
 
   const cashInRegister = await db.get(`
-    SELECT 
-      SUM(CASE WHEN p.moneda_cambio = 'VES' THEN p.monto ELSE p.monto * v.tasa_dolar END) as bolivares,
-      SUM(CASE WHEN p.moneda_cambio = 'USD' THEN p.monto ELSE p.monto / v.tasa_dolar END) as dolares
-    FROM pagos p
-    JOIN ventas v ON p.id_venta = v.id_venta
-    WHERE DATE(v.fecha_venta) = DATE('now')
+SELECT 
+  SUM(CASE WHEN p.moneda_cambio = 'VES' THEN p.monto ELSE 0 END) as total_bolivares,
+  SUM(CASE WHEN p.moneda_cambio = 'USD' THEN p.monto ELSE 0 END) as total_dolares
+FROM pagos p
+JOIN ventas v ON p.id_venta = v.id_venta
+WHERE DATE(v.fecha_venta) = DATE('now');
+
   `)
 
   const totalProductsSold = await db.get(`
@@ -47,8 +48,8 @@ export async function getDashboardData(): Promise<DashboardData> {
     lowStockProducts: lowStockProducts || [],
     topSellingProducts: topSellingProducts || [],
     cashInRegister: {
-      bolivares: cashInRegister?.bolivares || 0,
-      dolares: cashInRegister?.dolares || 0
+      bolivares: cashInRegister?.total_bolivares || 0,
+      dolares: cashInRegister?.total_dolares || 0
     },
     totalProductsSold: totalProductsSold.total || 0
   }

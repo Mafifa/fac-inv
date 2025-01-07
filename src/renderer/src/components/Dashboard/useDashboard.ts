@@ -47,13 +47,13 @@ export const useDashboard = () => {
 
     fetchDashboardData()
     fetchDailyStats()
-    // Actualizar cada 5 minutos
+    // Actualizar cada 30 minutos
     const interval = setInterval(
       () => {
         fetchDashboardData()
         fetchDailyStats()
       },
-      5 * 60 * 1000
+      30 * 60 * 1000
     )
 
     return () => clearInterval(interval)

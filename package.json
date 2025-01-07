@@ -1,6 +1,6 @@
 {
   "name": "vendible",
-  "version": "1.0.3",
+  "version": "1.0.0",
   "description": "Sistema de facturacion desarrollado por DASCA",
   "main": "./out/main/index.js",
   "author": "Carlos Mafifa",
