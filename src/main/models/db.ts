@@ -1,13 +1,21 @@
 import sqlite3 from 'sqlite3'
 import { open } from 'sqlite'
-
-let db: any = null
+import { app } from 'electron'
+import path from 'path'
+import fs from 'fs'
 
 export async function getDb() {
-  if (db) return db
+  const userDataPath = app.getPath('userData')
+  const dbFolderPath = path.join(userDataPath, 'db')
+  const dbFilePath = path.join(dbFolderPath, 'inventory.db')
 
-  db = await open({
-    filename: 'inventory.db',
+  // Create the db folder if it doesn't exist
+  if (!fs.existsSync(dbFolderPath)) {
+    fs.mkdirSync(dbFolderPath, { recursive: true })
+  }
+
+  const db = await open({
+    filename: dbFilePath,
     driver: sqlite3.Database
   })
 
