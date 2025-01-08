@@ -39,7 +39,7 @@ export async function addProducto(producto: Producto): Promise<number> {
       'INSERT INTO productos (nombre, precio_base, stock, descuento, activo) VALUES (?, ?, ?, ?, 1)',
       [producto.nombre, producto.precio_base, producto.stock, producto.descuento || 0]
     )
-    return result.lastID
+    return result.lastID as number
   } catch (error) {
     console.error('Error al agregar producto:', error)
     throw new Error('Error al agregar producto a la base de datos')

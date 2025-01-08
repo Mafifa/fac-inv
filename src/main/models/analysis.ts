@@ -90,7 +90,7 @@ export async function getAnalysisData(): Promise<AnalysisData> {
     LIMIT 30
   `)
 
-  const productosMasVendidos = await db.all(`
+  const productosMasVendidos = (await db.all(`
     SELECT 
       p.nombre,
       SUM(dv.cantidad) as cantidad,
@@ -101,7 +101,7 @@ export async function getAnalysisData(): Promise<AnalysisData> {
     GROUP BY dv.id_producto
     ORDER BY cantidad DESC
     LIMIT 5
-  `)
+  `)) as Producto[]
 
   return {
     totalFacturadoBolivares: totalFacturado.totalBolivares || 0,

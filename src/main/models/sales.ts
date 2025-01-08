@@ -59,7 +59,7 @@ export async function realizarVenta(
     }
 
     await db.run('COMMIT')
-    return lastID
+    return lastID as number
   } catch (error) {
     await db.run('ROLLBACK')
     throw error

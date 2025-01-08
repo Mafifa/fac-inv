@@ -48,7 +48,7 @@ declare global {
     ventasPorProducto: { nombre: string; cantidad: number; total: number }[]
     ventasPorDiaSemana: { dia: string; ventas: number }[]
     ventasPorFecha: { fecha: string; ventas: number }[]
-    productosMasVendidos: []
+    productosMasVendidos: Producto[]
   }
 
   interface DolarRate {
