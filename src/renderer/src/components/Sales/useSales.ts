@@ -1,11 +1,5 @@
 import { useState, useCallback, useEffect } from 'react'
 
-export interface Producto {
-  id_producto: number
-  nombre: string
-  precio_base: number
-}
-
 export const useSales = () => {
   const [productos, setProductos] = useState<Producto[]>([])
   const [paginaActual, setPaginaActual] = useState(1)

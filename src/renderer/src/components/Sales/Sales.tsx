@@ -1,5 +1,5 @@
 import React, { useState, useCallback } from 'react';
-import { useSales, Producto } from './useSales';
+import { useSales } from './useSales';
 import { useCart, CartItem } from './useCart';
 import { useAppContext } from '../../context/appContext';
 import { toast } from 'sonner';
@@ -40,7 +40,8 @@ const Ventas: React.FC = () => {
     agregarAlCarrito({
       id: producto.id_producto,
       nombre: producto.nombre,
-      precio_base: producto.precio_base
+      precio_base: producto.precio_base,
+      stock: producto.stock
     });
   }, [agregarAlCarrito]);
 
@@ -178,10 +179,15 @@ const Ventas: React.FC = () => {
                     <div className={`text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
                       ${producto.precio_base.toFixed(2)} / {(producto.precio_base * getTasaCambio('facturacion')).toFixed(2)} Bs
                     </div>
+                    <div className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
+                      Stock: {producto.stock}
+                    </div>
                   </div>
                   <button
                     onClick={() => handleAgregarAlCarrito(producto)}
-                    className="bg-blue-500 text-white px-3 py-2 rounded-lg hover:bg-blue-600 transition duration-150 ease-in-out flex items-center"
+                    disabled={producto.stock === 0}
+                    className={`bg-blue-500 text-white px-3 py-2 rounded-lg hover:bg-blue-600 transition duration-150 ease-in-out flex items-center ${producto.stock === 0 ? 'opacity-50 cursor-not-allowed' : ''
+                      }`}
                   >
                     <Plus size={18} className="mr-1" />
                     Agregar
@@ -240,7 +246,9 @@ const Ventas: React.FC = () => {
                   <span className={`mx-3 font-semibold ${isDarkMode ? 'text-gray-100' : 'text-gray-800'}`}>{item.cantidad}</span>
                   <button
                     onClick={() => actualizarCantidadCarrito(item.id, item.cantidad + 1)}
-                    className="bg-green-500 text-white p-1 rounded-full hover:bg-green-600 transition duration-150 ease-in-out"
+                    disabled={item.cantidad >= item.stock}
+                    className={`bg-green-500 text-white p-1 rounded-full hover:bg-green-600 transition duration-150 ease-in-out ${item.cantidad >= item.stock ? 'opacity-50 cursor-not-allowed' : ''
+                      }`}
                   >
                     <Plus size={18} />
                   </button>
@@ -353,4 +361,3 @@ const Ventas: React.FC = () => {
 };
 
 export default Ventas;
-
