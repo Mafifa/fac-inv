@@ -16,15 +16,14 @@
     "build": "npm run typecheck && electron-vite build",
     "postinstall": "electron-builder install-app-deps",
     "build:unpack": "npm run build && electron-builder --dir",
-    "build:win": "npm run build && electron-builder --win --ia32",
-    "build:win32": "npm run build && electron-builder --win --ia32",
+    "build:win": "npm run build && electron-builder --win --ia32 --x64 --config.compression=maximum",
+    "build:win32": "npm run build && electron-builder --win --ia32 --config.compression=maximum",
     "build:mac": "electron-vite build && electron-builder --mac",
     "build:linux": "electron-vite build && electron-builder --linux"
   },
   "dependencies": {
     "@electron-toolkit/preload": "3.0.1",
     "@electron-toolkit/utils": "3.0.0",
-    "@fontsource-variable/nunito": "5.1.0",
     "electron-store": "8.2.0",
     "electron-updater": "6.3.9",
     "lucide-react": "0.438.0",
@@ -37,6 +36,7 @@
     "@electron-toolkit/eslint-config-prettier": "2.0.0",
     "@electron-toolkit/eslint-config-ts": "2.0.0",
     "@electron-toolkit/tsconfig": "1.0.1",
+    "@fontsource-variable/nunito": "5.1.0",
     "@types/node": "20.14.8",
     "@types/react": "18.3.3",
     "@types/react-dom": "18.3.0",
@@ -64,7 +64,8 @@
     "files": [
       "dist/**/*",
       "out/**/*",
-      "node_modules/**/*",
+      "!**/*.map",
+      "!**/*.ts",
       "package.json"
     ],
     "publish": {
@@ -91,7 +92,6 @@
     "nsis": {
       "oneClick": false,
       "allowToChangeInstallationDirectory": true
-    },
-    "asar": false
+    }
   }
 }

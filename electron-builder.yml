@@ -1,4 +1,4 @@
-appId: com.electron.app
+appId: com.vendible.facturacionMaff
 productName: fac-inv
 directories:
   buildResources: build
@@ -9,11 +9,26 @@ files:
   - '!{.eslintignore,.eslintrc.cjs,.prettierignore,.prettierrc.yaml,dev-app-update.yml,CHANGELOG.md,README.md}'
   - '!{.env,.env.*,.npmrc,pnpm-lock.yaml}'
   - '!{tsconfig.json,tsconfig.node.json,tsconfig.web.json}'
+  - '!**/*.{map,ts}'
+  - '!**/*.{md,txt,log}'
+  - '!**/package-lock.json'
+  - '!**/yarn.lock'
 asarUnpack:
   - resources/**
+asar:
+  compression: maximum
 win:
   executableName: fac-inv
+  target:
+    - target: nsis
+      arch:
+        - x64
+  compression: maximum
 nsis:
+  oneClick: true
+  perMachine: false
+  allowToChangeInstallationDirectory: false
+  deleteAppDataOnUninstall: true
   artifactName: ${name}-${version}-setup.${ext}
   shortcutName: ${productName}
   uninstallDisplayName: ${productName}
@@ -31,13 +46,12 @@ dmg:
 linux:
   target:
     - AppImage
-    - snap
-    - deb
   maintainer: electronjs.org
   category: Utility
 appImage:
   artifactName: ${name}-${version}.${ext}
 npmRebuild: false
 publish:
-  provider: generic
-  url: https://example.com/auto-updates
+  provider: github
+  owner: Mafifa
+  repo: fac-inv
