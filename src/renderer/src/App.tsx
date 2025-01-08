@@ -10,11 +10,11 @@ import UpdateModal from './components/updateModal'
 import { Home, Package, ShoppingCart, BarChart2, History, Settings } from 'lucide-react'
 import { useAppContext } from './context/appContext'
 
-interface UpdateInfo {
-  version: string
-  releaseDate: string
-  files: { size: number }[]
-}
+// interface UpdateInfo {
+//   version: string
+//   releaseDate: string
+//   files: { size: number }[]
+// }
 // interface ProgressInfo {
 //   percent: number
 //   bytesPerSecond: number
@@ -23,18 +23,18 @@ interface UpdateInfo {
 const App: React.FC = () => {
   const [activeTab, setActiveTab] = useState('dashboard')
   const [isSettingsOpen, setIsSettingsOpen] = useState(false)
-  const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false)
-  const [updateInfo, setUpdateInfo] = useState<UpdateInfo | null>(null)
+  // const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false)
+  // const [updateInfo, setUpdateInfo] = useState<UpdateInfo | null>(null)
 
-  useEffect(() => {
-    // Escuchar el evento 'update-available' desde el preload
-    window.api.onUpdateAvailable((info: UpdateInfo) => {
-      setUpdateInfo(info)
-      if (updateInfo) {
-        setIsUpdateModalOpen(true)
-      }
-    })
-  }, [])
+  // useEffect(() => {
+  //   // Escuchar el evento 'update-available' desde el preload
+  //   window.api.onUpdateAvailable((info: UpdateInfo) => {
+  //     setUpdateInfo(info)
+  //     if (updateInfo) {
+  //       setIsUpdateModalOpen(true)
+  //     }
+  //   })
+  // }, [])
 
   const { config } = useAppContext()
 
@@ -112,11 +112,11 @@ const App: React.FC = () => {
             onClose={() => setIsSettingsOpen(false)}
           />
         )}
-        <UpdateModal
+        {/* <UpdateModal
           isOpen={isUpdateModalOpen}
           onClose={() => setIsUpdateModalOpen(false)}
           updateInfo={updateInfo}
-        />
+        /> */}
       </div>
     </div>
   );

@@ -38,8 +38,8 @@ function createWindow(): void {
 }
 
 function setupAutoUpdater(): void {
-  autoUpdater.autoDownload = false
-  autoUpdater.autoInstallOnAppQuit = false
+  autoUpdater.autoDownload = true
+  autoUpdater.autoInstallOnAppQuit = true
 
   autoUpdater.on('checking-for-update', () => {
     console.log('Checking for update...')
@@ -47,35 +47,7 @@ function setupAutoUpdater(): void {
 
   autoUpdater.on('update-available', (info) => {
     console.log('Update available.', info)
-
-    // Enviar información de la actualización al frontend
-    if (mainWindow) {
-      mainWindow.webContents.send('update-available', {
-        version: info.version,
-        releaseDate: info.releaseDate,
-        files: info.files
-      })
-
-      // Mostrar también una ventana de diálogo opcional (puedes mantener esto si lo deseas)
-      dialog
-        .showMessageBox(mainWindow, {
-          type: 'info',
-          title: 'Actualización disponible',
-          message: `Hay una nueva versión disponible: ${info.version}. ¿Quieres descargarla ahora?`,
-          buttons: ['Sí', 'No']
-        })
-        .then((result) => {
-          if (result.response === 0) {
-            autoUpdater.downloadUpdate().catch((err) => {
-              console.error('Error al descargar la actualización:', err)
-              dialog.showErrorBox(
-                'Error de actualización',
-                'Hubo un error al descargar la actualización.'
-              )
-            })
-          }
-        })
-    }
+    // La actualización se descargará automáticamente
   })
 
   autoUpdater.on('update-not-available', (info) => {
@@ -84,25 +56,16 @@ function setupAutoUpdater(): void {
 
   autoUpdater.on('error', (err) => {
     console.error('Error in auto-updater. ', err)
-    if (mainWindow) {
-      dialog.showErrorBox(
-        'Error de actualización',
-        'Ocurrió un error durante el proceso de actualización.'
-      )
-    }
   })
 
   autoUpdater.on('download-progress', (progressObj) => {
     const progressData = {
       percent: progressObj.percent.toFixed(2),
-      speed: (progressObj.bytesPerSecond / 1024).toFixed(2), // Velocidad en KB/s
-      transferred: (progressObj.transferred / (1024 * 1024)).toFixed(2), // En MB
-      total: (progressObj.total / (1024 * 1024)).toFixed(2) // En MB
+      speed: (progressObj.bytesPerSecond / 1024).toFixed(2),
+      transferred: (progressObj.transferred / (1024 * 1024)).toFixed(2),
+      total: (progressObj.total / (1024 * 1024)).toFixed(2)
     }
-
-    if (mainWindow) {
-      mainWindow.webContents.send('download-progress', progressData) // Enviar datos al renderizador
-    }
+    console.log('Download progress', progressData)
   })
 
   autoUpdater.on('update-downloaded', (info) => {
@@ -112,8 +75,8 @@ function setupAutoUpdater(): void {
         .showMessageBox(mainWindow, {
           type: 'info',
           title: 'Actualización lista',
-          message: `La actualización ${info.version} se ha descargado. ¿Quieres reiniciar para instalarla ahora?`,
-          buttons: ['Reiniciar', 'Después']
+          message: `La actualización ${info.version} se ha descargado e instalado. Es necesario reiniciar la aplicación para aplicar los cambios. ¿Quieres reiniciar ahora?`,
+          buttons: ['Reiniciar', 'Más tarde']
         })
         .then((result) => {
           if (result.response === 0) {
@@ -127,12 +90,6 @@ function setupAutoUpdater(): void {
 function checkForUpdates(): void {
   autoUpdater.checkForUpdates().catch((err) => {
     console.error('Error al buscar actualizaciones:', err)
-    if (mainWindow) {
-      dialog.showErrorBox(
-        'Error de actualización',
-        'No se pudo buscar actualizaciones. Por favor, inténtalo más tarde.'
-      )
-    }
   })
 }
 
@@ -149,7 +106,7 @@ app.whenReady().then(() => {
   setupControllers()
 
   checkForUpdates()
-  setInterval(checkForUpdates, 2 * 60 * 60 * 1000)
+  setInterval(checkForUpdates, 2 * 60 * 60 * 1000) // Comprobar actualizaciones cada 2 horas
 
   app.on('activate', function () {
     if (BrowserWindow.getAllWindows().length === 0) createWindow()
