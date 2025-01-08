@@ -3,7 +3,7 @@ import { useSales, Producto } from './useSales';
 import { useCart, CartItem } from './useCart';
 import { useAppContext } from '../../context/appContext';
 import { toast } from 'sonner';
-import { Search, ShoppingCart, Plus, Minus, X } from 'lucide-react';
+import { Search, ShoppingCart, Plus, Minus, X, RefreshCw } from 'lucide-react';
 
 const Ventas: React.FC = () => {
   const { getTasaCambio, config } = useAppContext();
@@ -13,8 +13,10 @@ const Ventas: React.FC = () => {
     paginaActual,
     totalPaginas,
     filtroBusqueda,
+    isLoading,
     buscarProductos,
-    cambiarPagina
+    cambiarPagina,
+    refrescarProductos
   } = useSales();
 
   const {
@@ -101,10 +103,11 @@ const Ventas: React.FC = () => {
       setMontoPagado('');
       setVentaActual(null);
       limpiarCarrito();
+      refrescarProductos(); // Refrescar productos después de una venta exitosa
     } catch (error) {
       toast.error('Error al registrar el pago');
     }
-  }, [ventaActual, calcularTotal, metodoPago, montoPagado, getTasaCambio, limpiarCarrito]);
+  }, [ventaActual, calcularTotal, metodoPago, montoPagado, getTasaCambio, limpiarCarrito, refrescarProductos]);
 
   const calcularCambio = useCallback(() => {
     const total = calcularTotal();
@@ -124,10 +127,15 @@ const Ventas: React.FC = () => {
     return { bolivares: 0, dolares: 0 };
   }, [calcularTotal, metodoPago, montoPagado, getTasaCambio]);
 
+  const handleRefresh = useCallback(() => {
+    refrescarProductos();
+    toast.success('Productos actualizados');
+  }, [refrescarProductos]);
+
   return (
     <div className={`ventas ${isDarkMode ? 'bg-gray-900 text-white' : 'bg-gray-100 text-gray-900'} -mt-2`}>
-      <div className="mb-4">
-        <div className="relative">
+      <div className="mb-4 flex justify-between items-center">
+        <div className="relative flex-grow mr-4">
           <input
             type="text"
             placeholder="Buscar productos..."
@@ -140,35 +148,52 @@ const Ventas: React.FC = () => {
           />
           <Search className={`absolute left-3 top-3 ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`} />
         </div>
+        <button
+          onClick={handleRefresh}
+          disabled={isLoading}
+          className={`p-2 rounded-full ${isDarkMode
+            ? 'bg-gray-700 hover:bg-gray-600'
+            : 'bg-gray-200 hover:bg-gray-300'
+            } transition-colors duration-200 ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
+          title="Actualizar productos"
+        >
+          <RefreshCw size={20} className={`${isDarkMode ? 'text-gray-300' : 'text-gray-600'} ${isLoading ? 'animate-spin' : ''}`} />
+        </button>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         <div className={`rounded-lg shadow-md p-6 ${isDarkMode ? 'bg-gray-800' : 'bg-white'}`}>
           <h2 className={`text-2xl font-semibold mb-2 ${isDarkMode ? 'text-gray-100' : 'text-gray-800'}`}>Productos</h2>
           <div className="h-[calc(100vh-300px)] overflow-y-auto">
-            {productos.map((producto) => (
-              <div key={producto.id_producto} className={`flex justify-between items-center mb-4 p-3 rounded-lg transition duration-150 ease-in-out ${isDarkMode ? 'bg-gray-700 hover:bg-gray-600' : 'bg-gray-50 hover:bg-gray-100'
-                }`}>
-                <div>
-                  <div className={`font-semibold ${isDarkMode ? 'text-gray-100' : 'text-gray-800'}`}>{producto.nombre}</div>
-                  <div className={`text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
-                    ${producto.precio_base.toFixed(2)} / {(producto.precio_base * getTasaCambio('facturacion')).toFixed(2)} Bs
-                  </div>
-                </div>
-                <button
-                  onClick={() => handleAgregarAlCarrito(producto)}
-                  className="bg-blue-500 text-white px-3 py-2 rounded-lg hover:bg-blue-600 transition duration-150 ease-in-out flex items-center"
-                >
-                  <Plus size={18} className="mr-1" />
-                  Agregar
-                </button>
+            {isLoading ? (
+              <div className="flex justify-center items-center h-full">
+                <RefreshCw size={40} className={`${isDarkMode ? 'text-gray-300' : 'text-gray-600'} animate-spin`} />
               </div>
-            ))}
+            ) : (
+              productos.map((producto) => (
+                <div key={producto.id_producto} className={`flex justify-between items-center mb-4 p-3 rounded-lg transition duration-150 ease-in-out ${isDarkMode ? 'bg-gray-700 hover:bg-gray-600' : 'bg-gray-50 hover:bg-gray-100'
+                  }`}>
+                  <div>
+                    <div className={`font-semibold ${isDarkMode ? 'text-gray-100' : 'text-gray-800'}`}>{producto.nombre}</div>
+                    <div className={`text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
+                      ${producto.precio_base.toFixed(2)} / {(producto.precio_base * getTasaCambio('facturacion')).toFixed(2)} Bs
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => handleAgregarAlCarrito(producto)}
+                    className="bg-blue-500 text-white px-3 py-2 rounded-lg hover:bg-blue-600 transition duration-150 ease-in-out flex items-center"
+                  >
+                    <Plus size={18} className="mr-1" />
+                    Agregar
+                  </button>
+                </div>
+              ))
+            )}
           </div>
           <div className="mt-4 flex justify-between items-center">
             <button
               onClick={() => cambiarPagina(paginaActual - 1)}
-              disabled={paginaActual === 1}
+              disabled={paginaActual === 1 || isLoading}
               className={`px-4 py-2 rounded-lg disabled:opacity-50 transition duration-150 ease-in-out ${isDarkMode
                 ? 'bg-gray-700 text-gray-300 hover:bg-gray-600 disabled:bg-gray-800 disabled:text-gray-600'
                 : 'bg-gray-200 text-gray-700 hover:bg-gray-300 disabled:bg-gray-100 disabled:text-gray-400'
@@ -179,7 +204,7 @@ const Ventas: React.FC = () => {
             <span className={isDarkMode ? 'text-gray-300' : 'text-gray-600'}>Página {paginaActual} de {totalPaginas}</span>
             <button
               onClick={() => cambiarPagina(paginaActual + 1)}
-              disabled={paginaActual === totalPaginas}
+              disabled={paginaActual === totalPaginas || isLoading}
               className={`px-4 py-2 rounded-lg disabled:opacity-50 transition duration-150 ease-in-out ${isDarkMode
                 ? 'bg-gray-700 text-gray-300 hover:bg-gray-600 disabled:bg-gray-800 disabled:text-gray-600'
                 : 'bg-gray-200 text-gray-700 hover:bg-gray-300 disabled:bg-gray-100 disabled:text-gray-400'

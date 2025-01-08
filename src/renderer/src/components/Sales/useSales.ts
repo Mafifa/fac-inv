@@ -11,8 +11,10 @@ export const useSales = () => {
   const [paginaActual, setPaginaActual] = useState(1)
   const [totalPaginas, setTotalPaginas] = useState(1)
   const [filtroBusqueda, setFiltroBusqueda] = useState('')
+  const [isLoading, setIsLoading] = useState(false)
 
   const obtenerProductos = useCallback(async (pagina: number, busqueda: string) => {
+    setIsLoading(true)
     try {
       const result = await window.electron.ipcRenderer.invoke(
         'get-productos-venta',
@@ -23,6 +25,8 @@ export const useSales = () => {
       setTotalPaginas(result.totalPaginas)
     } catch (error) {
       console.error('Error fetching productos para venta:', error)
+    } finally {
+      setIsLoading(false)
     }
   }, [])
 
@@ -44,12 +48,18 @@ export const useSales = () => {
     [totalPaginas]
   )
 
+  const refrescarProductos = useCallback(() => {
+    obtenerProductos(paginaActual, filtroBusqueda)
+  }, [obtenerProductos, paginaActual, filtroBusqueda])
+
   return {
     productos,
     paginaActual,
     totalPaginas,
     filtroBusqueda,
+    isLoading,
     buscarProductos,
-    cambiarPagina
+    cambiarPagina,
+    refrescarProductos
   }
 }
