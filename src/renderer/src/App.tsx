@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState } from 'react'
 import { Toaster } from 'sonner'
 import Dashboard from './components/Dashboard/dashboard'
 import Inventario from './components/Inventory/inventory'
@@ -6,37 +6,14 @@ import Ventas from './components/Sales/sales'
 import Analisis from './components/Analysis/analysis'
 import Historial from './components/History/history'
 import Configuracion from './components/Settings/settings'
-import UpdateModal from './components/updateModal'
-import { Home, Package, ShoppingCart, BarChart2, History, Settings } from 'lucide-react'
+import { Home, Package, ShoppingCart, BarChart2, History, Settings, RefreshCw } from 'lucide-react'
 import { useAppContext } from './context/appContext'
-
-// interface UpdateInfo {
-//   version: string
-//   releaseDate: string
-//   files: { size: number }[]
-// }
-// interface ProgressInfo {
-//   percent: number
-//   bytesPerSecond: number
-// }
 
 const App: React.FC = () => {
   const [activeTab, setActiveTab] = useState('dashboard')
   const [isSettingsOpen, setIsSettingsOpen] = useState(false)
-  // const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false)
-  // const [updateInfo, setUpdateInfo] = useState<UpdateInfo | null>(null)
-
-  // useEffect(() => {
-  //   // Escuchar el evento 'update-available' desde el preload
-  //   window.api.onUpdateAvailable((info: UpdateInfo) => {
-  //     setUpdateInfo(info)
-  //     if (updateInfo) {
-  //       setIsUpdateModalOpen(true)
-  //     }
-  //   })
-  // }, [])
-
-  const { config } = useAppContext()
+  const [showTooltip, setShowTooltip] = useState(false)
+  const { config, updateTasasDolar } = useAppContext()
 
   const modoOscuro = config.modoOscuro
 
@@ -47,14 +24,6 @@ const App: React.FC = () => {
     { id: 'historial', name: 'Historial', icon: History },
     { id: 'analisis', name: 'Análisis', icon: BarChart2 }
   ]
-
-  // const handleStartDownload = () => {
-  //   window.electron.ipcRenderer.invoke('start-download')
-  // }
-
-  // const handleInstallUpdate = () => {
-  //   window.electron.ipcRenderer.invoke('quit-and-install')
-  // }
 
   return (
     <div className={`flex flex-col h-screen ${modoOscuro ? 'dark' : ''}`}>
@@ -112,11 +81,43 @@ const App: React.FC = () => {
             onClose={() => setIsSettingsOpen(false)}
           />
         )}
-        {/* <UpdateModal
-          isOpen={isUpdateModalOpen}
-          onClose={() => setIsUpdateModalOpen(false)}
-          updateInfo={updateInfo}
-        /> */}
+
+        {/* Botón flotante para actualizar tasas */}
+        <div className="fixed bottom-6 right-6">
+          <button
+            onClick={updateTasasDolar}
+            onMouseEnter={() => setShowTooltip(true)}
+            onMouseLeave={() => setShowTooltip(false)}
+            className={`p-3 rounded-full shadow-lg transition-all duration-200 ease-in-out ${modoOscuro
+              ? 'bg-blue-600 text-white hover:bg-blue-500'
+              : 'bg-blue-500 text-white hover:bg-blue-600'
+              } focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500`}
+            aria-label="Actualizar tasas del dólar"
+          >
+            <RefreshCw className="h-6 w-6" />
+          </button>
+
+          {showTooltip && (
+            <div
+              className={`absolute bottom-full right-0 mb-2 p-2 rounded shadow-lg ${modoOscuro ? 'bg-gray-800 text-white' : 'bg-white text-gray-800'
+                }`}
+              style={{
+                width: '200px',
+                transform: 'translateX(16px)'
+              }}
+            >
+              <p className="font-semibold mb-1">Actualizar tasas del dólar</p>
+              <p className="text-sm">Las tasas se actualizan automáticamente cada 30 minutos. Haz clic para actualizar manualmente.</p>
+              <div
+                className={`absolute bottom-0 right-0 w-3 h-3 transform rotate-45 translate-y-1/2 ${modoOscuro ? 'bg-gray-800' : 'bg-white'
+                  }`}
+                style={{
+                  right: '12px'
+                }}
+              ></div>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

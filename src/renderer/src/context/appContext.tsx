@@ -1,4 +1,9 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
+
+export interface DolarRate {
+  fuente: string;
+  promedio: number;
+}
 
 export interface Config {
   tasaCambioInventario: string;
@@ -17,6 +22,7 @@ export interface AppContextType {
   config: Config;
   updateConfig: (key: keyof Config, value: any) => Promise<void>;
   getTasaCambio: (tipo: 'inventario' | 'facturacion') => number;
+  updateTasasDolar: () => Promise<void>;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -43,21 +49,25 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     modoOscuro: false,
   });
 
-  useEffect(() => {
-    const fetchTasasDolar = async () => {
-      try {
-        const tasas = await window.electron.ipcRenderer.invoke('get-tasas');
-        if ('error' in tasas) {
-          throw new Error(tasas.error);
-        }
-        setTasasDolar(tasas);
-        setIsLoading(false);
-      } catch (err) {
-        console.error('Error fetching tasas dolar:', err);
-        setError('Error al obtener las tasas del dólar');
-        setIsLoading(false);
+  const fetchTasasDolar = async () => {
+    try {
+      setIsLoading(true);
+      const tasas = await window.electron.ipcRenderer.invoke('get-tasas');
+      if ('error' in tasas) {
+        throw new Error(tasas.error);
       }
-    };
+      setTasasDolar(tasas);
+      setError(null);
+    } catch (err) {
+      console.error('Error fetching tasas dolar:', err);
+      setError('Error al obtener las tasas del dólar');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchTasasDolar();
 
     const loadConfig = async () => {
       try {
@@ -69,7 +79,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       }
     };
 
-    fetchTasasDolar();
     loadConfig();
   }, []);
 
@@ -87,11 +96,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
   };
 
-  const getTasaCambio = (tipo: 'inventario' | 'facturacion') => {
+  const getTasaCambio = useCallback((tipo: 'inventario' | 'facturacion') => {
     const tasaConfig = tipo === 'inventario' ? config.tasaCambioInventario : config.tasaCambioFacturacion;
     const tasaPersonalizada = tipo === 'inventario' ? config.tasaPersonalizadaInventario : config.tasaPersonalizadaFacturacion;
 
-    // Si Bolivar paralelo esta activado
     if (config.modalidadBolivarParalelo) {
       return tasasDolar.find(t => t.fuente === 'paralelo')?.promedio || 0;
     }
@@ -110,10 +118,14 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       default:
         return 0;
     }
-  };
+  }, [config, tasasDolar]);
+
+  const updateTasasDolar = useCallback(async () => {
+    await fetchTasasDolar();
+  }, []);
 
   return (
-    <AppContext.Provider value={{ tasasDolar, isLoading, error, config, updateConfig, getTasaCambio }}>
+    <AppContext.Provider value={{ tasasDolar, isLoading, error, config, updateConfig, getTasaCambio, updateTasasDolar }}>
       {children}
     </AppContext.Provider>
   );
