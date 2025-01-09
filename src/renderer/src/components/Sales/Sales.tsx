@@ -30,7 +30,6 @@ const Ventas: React.FC = () => {
   const [modalPagoVisible, setModalPagoVisible] = useState(false);
   const [metodoPago, setMetodoPago] = useState<'efectivo' | 'dolares' | 'transferencia' | 'punto'>('efectivo');
   const [montoPagado, setMontoPagado] = useState('');
-  const [ventaActual, setVentaActual] = useState<number | null>(null);
 
   const handleBusqueda = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     buscarProductos(e.target.value);
@@ -45,31 +44,15 @@ const Ventas: React.FC = () => {
     });
   }, [agregarAlCarrito]);
 
-  const handleRealizarVenta = useCallback(async () => {
+  const handleRealizarVenta = useCallback(() => {
     if (carrito.length === 0) {
       toast.warning('El carrito está vacío');
       return;
     }
-    try {
-      const ventaData = carrito.map(item => ({ id: item.id, cantidad: item.cantidad }));
-      const idVenta = await window.electron.ipcRenderer.invoke(
-        'realizar-venta',
-        ventaData,
-        getTasaCambio('facturacion')
-      );
-      setVentaActual(idVenta);
-      setModalPagoVisible(true);
-    } catch (error) {
-      toast.error('Error al realizar la venta');
-    }
-  }, [carrito, getTasaCambio]);
+    setModalPagoVisible(true);
+  }, [carrito]);
 
   const handlePago = useCallback(async () => {
-    if (!ventaActual) {
-      toast.error('Error: No hay venta activa');
-      return;
-    }
-
     const total = calcularTotal();
     let montoFinal: number | null = null;
     let monedaCambio = 'VES';
@@ -92,23 +75,32 @@ const Ventas: React.FC = () => {
     }
 
     try {
+      // Realizar la venta
+      const ventaData = carrito.map(item => ({ id: item.id, cantidad: item.cantidad }));
+      const idVenta = await window.electron.ipcRenderer.invoke(
+        'realizar-venta',
+        ventaData,
+        getTasaCambio('facturacion')
+      );
+
+      // Registrar el pago
       await window.electron.ipcRenderer.invoke(
         'registrar-pago',
-        ventaActual,
+        idVenta,
         metodoPago,
         montoFinal,
         monedaCambio
       );
-      toast.success('Pago registrado con éxito');
+
+      toast.success('Venta realizada y pago registrado con éxito');
       setModalPagoVisible(false);
       setMontoPagado('');
-      setVentaActual(null);
       limpiarCarrito();
       refrescarProductos(); // Refrescar productos después de una venta exitosa
     } catch (error) {
-      toast.error('Error al registrar el pago');
+      toast.error('Error al realizar la venta o registrar el pago');
     }
-  }, [ventaActual, calcularTotal, metodoPago, montoPagado, getTasaCambio, limpiarCarrito, refrescarProductos]);
+  }, [carrito, calcularTotal, metodoPago, montoPagado, getTasaCambio, limpiarCarrito, refrescarProductos]);
 
   const calcularCambio = useCallback(() => {
     const total = calcularTotal();
@@ -361,3 +353,4 @@ const Ventas: React.FC = () => {
 };
 
 export default Ventas;
+

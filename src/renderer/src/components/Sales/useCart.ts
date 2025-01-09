@@ -6,7 +6,7 @@ export interface CartItem {
   nombre: string
   precio_base: number
   cantidad: number
-  stock: number // Añadimos el campo stock
+  stock: number
 }
 
 export const useCart = () => {
