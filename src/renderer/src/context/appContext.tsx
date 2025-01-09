@@ -1,10 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 
-export interface DolarRate {
-  fuente: string;
-  promedio: number;
-}
-
 export interface Config {
   tasaCambioInventario: string;
   tasaPersonalizadaInventario: number | null;
