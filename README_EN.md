@@ -6,6 +6,7 @@
 ![License](https://img.shields.io/badge/license-MIT-green.svg)
 
 Billing and Inventory System developed by DASCA
+
 </div>
 
 ## 📋 Description
@@ -131,4 +132,4 @@ For support and inquiries, please create an issue in the repository or contact t
 
 ---
 
-Developed with ❤️ by DASCA
+Developed with ❤️ by Mafifa

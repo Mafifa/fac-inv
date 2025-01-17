@@ -6,6 +6,7 @@
 ![License](https://img.shields.io/badge/license-MIT-green.svg)
 
 Sistema de facturación e inventario desarrollado por DASCA
+
 </div>
 
 ## 📋 Descripción
@@ -131,4 +132,4 @@ Para soporte y consultas, por favor crear un issue en el repositorio o contactar
 
 ---
 
-Desarrollado con ❤️ por DASCA
+Desarrollado con ❤️ por Mafifa

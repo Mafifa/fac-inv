@@ -16,4 +16,4 @@ Billing and Inventory System | Sistema de Facturación e Inventario
 
 ---
 
-Developed with ❤️ by DASCA | Desarrollado con ❤️ por DASCA
+Developed with ❤️ by DASCA | Desarrollado con ❤️ por Mafifa
