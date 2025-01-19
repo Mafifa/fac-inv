@@ -1,5 +1,21 @@
 import { getDb } from './db'
 
+function formatearFechaLocal(fechaISO: string | Date): string {
+  // Asegurar que la entrada sea un objeto Date
+  const fecha = typeof fechaISO === 'string' ? new Date(fechaISO) : fechaISO
+
+  // Obtener los componentes de la fecha local
+  const anio = fecha.getFullYear()
+  const mes = String(fecha.getMonth() + 1).padStart(2, '0')
+  const dia = String(fecha.getDate()).padStart(2, '0')
+
+  const horas = String(fecha.getHours()).padStart(2, '0')
+  const minutos = String(fecha.getMinutes()).padStart(2, '0')
+  const segundos = String(fecha.getSeconds()).padStart(2, '0')
+
+  return `${anio}-${mes}-${dia} ${horas}:${minutos}:${segundos}`
+}
+
 const PRODUCTOS_POR_PAGINA = 8
 
 export async function getProductos(
@@ -38,10 +54,12 @@ export async function realizarVenta(
   await db.run('BEGIN TRANSACTION')
 
   try {
-    const { lastID } = await db.run(
-      'INSERT INTO ventas (fecha_venta, tasa_dolar) VALUES (datetime("now"), ?)',
-      [tasaDolar]
-    )
+    const currentDate = new Date()
+
+    const { lastID } = await db.run('INSERT INTO ventas (fecha_venta, tasa_dolar) VALUES (?, ?)', [
+      formatearFechaLocal(currentDate),
+      tasaDolar
+    ])
 
     for (const item of carrito) {
       const producto = await db.get('SELECT * FROM productos WHERE id_producto = ?', [item.id])
