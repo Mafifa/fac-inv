@@ -4,21 +4,34 @@ import { app } from 'electron'
 import path from 'path'
 import fs from 'fs'
 
-export async function getDb() {
-  const userDataPath = app.getPath('userData')
-  const dbFolderPath = path.join(userDataPath, 'db')
-  const dbFilePath = path.join(dbFolderPath, 'inventory.db')
+// Verifica si estamos en modo desarrollo
+const isDevelopment = process.env.NODE_ENV === 'development'
 
-  // Create the db folder if it doesn't exist
-  if (!fs.existsSync(dbFolderPath)) {
-    fs.mkdirSync(dbFolderPath, { recursive: true })
+export async function getDb() {
+  let dbFilePath: string
+
+  if (isDevelopment) {
+    // Ruta de la base de datos en la raíz del proyecto en modo desarrollo
+    dbFilePath = path.join(__dirname, 'inventory.db')
+  } else {
+    // Ruta de la base de datos en modo producción (userData de Electron)
+    const userDataPath = app.getPath('userData')
+    const dbFolderPath = path.join(userDataPath, 'db')
+    dbFilePath = path.join(dbFolderPath, 'inventory.db')
+
+    // Crear el directorio 'db' si no existe
+    if (!fs.existsSync(dbFolderPath)) {
+      fs.mkdirSync(dbFolderPath, { recursive: true })
+    }
   }
 
+  // Abrir la base de datos
   const db = await open({
     filename: dbFilePath,
     driver: sqlite3.Database
   })
 
+  // Crear tablas si no existen
   await db.exec(`
     CREATE TABLE IF NOT EXISTS productos (
       id_producto INTEGER PRIMARY KEY AUTOINCREMENT,
