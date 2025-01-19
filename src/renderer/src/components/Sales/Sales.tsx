@@ -3,7 +3,7 @@ import { useSales } from './useSales';
 import { useCart, CartItem } from './useCart';
 import { useAppContext } from '../../context/appContext';
 import { toast } from 'sonner';
-import { Search, ShoppingCart, Plus, Minus, X, RefreshCw } from 'lucide-react';
+import { Search, ShoppingCart, Plus, Minus, X, RefreshCw, Trash2 } from 'lucide-react';
 
 const Ventas: React.FC = () => {
   const { getTasaCambio, config } = useAppContext();
@@ -214,10 +214,27 @@ const Ventas: React.FC = () => {
         </div>
 
         <div className={`rounded-lg shadow-md p-6 ${isDarkMode ? 'bg-gray-800' : 'bg-white'}`}>
-          <h2 className={`text-2xl font-semibold mb-4 flex items-center ${isDarkMode ? 'text-gray-100' : 'text-gray-800'}`}>
-            <ShoppingCart className="mr-2" /> Carrito
-          </h2>
-          <div className="h-[calc(100vh-400px)] overflow-y-auto mb-4">
+          <div className="flex justify-between items-center mb-4">
+            <h2 className={`text-2xl font-semibold flex items-center ${isDarkMode ? 'text-gray-100' : 'text-gray-800'}`}>
+              <ShoppingCart className="mr-2" /> Carrito
+            </h2>
+            <button
+              onClick={limpiarCarrito}
+              disabled={carrito.length === 0}
+              className={`flex items-center justify-center px-4 py-2 rounded-lg transition duration-150 ease-in-out ${carrito.length === 0
+                ? isDarkMode
+                  ? 'bg-gray-700 text-gray-500 cursor-not-allowed'
+                  : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                : isDarkMode
+                  ? 'bg-red-600 text-white hover:bg-red-700'
+                  : 'bg-red-500 text-white hover:bg-red-600'
+                }`}
+            >
+              <Trash2 size={18} className="mr-2" />
+              Limpiar Carrito
+            </button>
+          </div>
+          <div className="h-[calc(100vh-440px)] overflow-y-auto mb-4">
             {carrito.map((item: CartItem) => (
               <div key={item.id} className={`flex justify-between items-center mb-4 p-3 rounded-lg ${isDarkMode ? 'bg-gray-700' : 'bg-gray-50'
                 }`}>
@@ -254,8 +271,9 @@ const Ventas: React.FC = () => {
             </div>
             <button
               onClick={handleRealizarVenta}
-              className="w-full bg-green-500 text-white px-6 py-3 rounded-lg hover:bg-green-600 transition duration-150 ease-in-out text-lg font-semibold"
+              className="w-full bg-green-500 text-white px-6 py-3 rounded-lg hover:bg-green-600 transition duration-150 ease-in-out text-lg font-semibold flex items-center justify-center"
             >
+              <ShoppingCart size={24} className="mr-2" />
               Realizar Venta
             </button>
           </div>
