@@ -3,16 +3,18 @@ import { open } from 'sqlite'
 import { app } from 'electron'
 import path from 'path'
 import fs from 'fs'
+import { is } from '@electron-toolkit/utils'
 
 // Verifica si estamos en modo desarrollo
-const isDevelopment = process.env.NODE_ENV === 'development'
+// const isDevelopment = process.env.NODE_ENV === 'development'
 
 export async function getDb() {
   let dbFilePath: string
 
-  if (isDevelopment) {
+  if (is.dev) {
     // Ruta de la base de datos en la raíz del proyecto en modo desarrollo
-    dbFilePath = path.join(__dirname, 'inventory.db')
+    dbFilePath = path.join(__dirname, '..', '..', 'db', 'inventory.db')
+    console.log(dbFilePath)
   } else {
     // Ruta de la base de datos en modo producción (userData de Electron)
     const userDataPath = app.getPath('userData')
