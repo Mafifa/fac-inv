@@ -184,7 +184,7 @@ const Analysis: React.FC = () => {
                 stroke={theme.text}
                 tickFormatter={formatHour}
               />
-              <YAxis stroke={theme.text} tickFormatter={formatCurrency} />
+              <YAxis stroke={theme.text} tickFormatter={formatSales} />
               <Tooltip
                 contentStyle={{ backgroundColor: isDarkMode ? '#4B5563' : '#FFFFFF', borderColor: isDarkMode ? '#6B7280' : '#E5E7EB' }}
                 labelStyle={{ color: isDarkMode ? '#E5E7EB' : '#374151' }}
