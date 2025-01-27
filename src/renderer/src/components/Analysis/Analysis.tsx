@@ -58,48 +58,76 @@ const Analysis: React.FC = () => {
 
   const renderCalendarHeatmap = () => {
     const blueShades = [
-      'bg-blue-50', 'bg-blue-100', 'bg-blue-200', 'bg-blue-300',
-      'bg-blue-400', 'bg-blue-500', 'bg-blue-600', 'bg-blue-700',
-      'bg-blue-800', 'bg-blue-900'
-    ];
+      "bg-blue-50",
+      "bg-blue-100",
+      "bg-blue-200",
+      "bg-blue-300",
+      "bg-blue-400",
+      "bg-blue-500",
+      "bg-blue-600",
+      "bg-blue-700",
+      "bg-blue-800",
+      "bg-blue-900",
+    ]
 
     const getColor = (sales: number) => {
-      if (sales === 0) return isDarkMode ? 'bg-gray-800' : 'bg-gray-100';
-      const intensity = Math.min(Math.floor((sales / analysisData.maxVentasDiarias) * 10), 9);
-      return blueShades[intensity];
-    };
+      if (sales === 0) return isDarkMode ? "bg-gray-800" : "bg-gray-100"
+      const intensity = Math.min(Math.floor((sales / analysisData.maxVentasDiarias) * 10), 9)
+      return blueShades[intensity]
+    }
 
-    const today = new Date();
-    const startDate = new Date(today.getFullYear(), today.getMonth(), 1);
-    const endDate = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+    const today = new Date()
+    const startDate = new Date(today.getFullYear(), today.getMonth(), 1)
+    const endDate = new Date(today.getFullYear(), today.getMonth() + 1, 0)
 
-    const calendarDays: Array<{ date: Date; sales: number }> = [];
+    const calendarDays: Array<{ date: Date; sales: number }> = []
     for (let d = new Date(startDate); d <= endDate; d.setDate(d.getDate() + 1)) {
-      const dateStr = d.toISOString().split('T')[0];
-      const salesData = analysisData.ventasPorFecha.find(item => item.fecha === dateStr);
+      const dateStr = d.toISOString().split("T")[0]
+      const salesData = analysisData.ventasPorFecha.find((item) => item.fecha === dateStr)
       calendarDays.push({
         date: new Date(d),
-        sales: salesData ? salesData.ventas : 0
-      });
+        sales: salesData ? salesData.ventas : 0,
+      })
     }
+
+    const daysOfWeek = ["Domingo", "Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado"]
+    const firstDayOfMonth = startDate.getDay()
 
     return (
       <div className="grid grid-cols-7 gap-1">
+        {daysOfWeek.map((day, index) => (
+          <div key={`header-${index}`} className="text-center text-xs font-semibold py-1">
+            {day}
+          </div>
+        ))}
+        {Array(firstDayOfMonth)
+          .fill(null)
+          .map((_, index) => (
+            <div key={`empty-${index}`} className="aspect-square"></div>
+          ))}
         {calendarDays.map((day, index) => (
           <div
             key={index}
             className={`aspect-square relative rounded-md overflow-hidden ${getColor(day.sales)}`}
             title={`${day.date.toLocaleDateString()}: $${day.sales.toFixed(2)}`}
           >
-            <span className={`absolute inset-0 flex items-center justify-center text-xs font-semibold ${day.sales > 0 ? (isDarkMode ? 'text-white' : 'text-gray-800') : (isDarkMode ? 'text-gray-400' : 'text-gray-600')
-              }`}>
+            <span
+              className={`absolute inset-0 flex items-center justify-center text-xs font-semibold ${day.sales > 0
+                ? isDarkMode
+                  ? "text-white"
+                  : "text-gray-800"
+                : isDarkMode
+                  ? "text-gray-400"
+                  : "text-gray-600"
+                }`}
+            >
               {day.date.getDate()}
             </span>
           </div>
         ))}
       </div>
-    );
-  };
+    )
+  }
 
   const formatHour = (hour: string) => {
     const hourNum = parseInt(hour, 10);
