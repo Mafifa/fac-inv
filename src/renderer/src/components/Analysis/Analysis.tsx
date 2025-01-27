@@ -40,6 +40,7 @@ const Analysis: React.FC = () => {
       : ['#3B82F6', '#10B981', '#F59E0B', '#EF4444'],
   };
 
+  const formatSales = (value: number) => `${value.toFixed(0)}`;
   const formatCurrency = (value: number) => `$${value.toFixed(2)}`;
   const formatNumber = (value: number) => value.toFixed(0);
 
@@ -159,7 +160,7 @@ const Analysis: React.FC = () => {
           description={`${formatNumber(analysisData.cantidadProductoMasVendido)} unidades`}
         />
         <SummaryCard
-          title="Promedio de Venta Diaria"
+          title="Promedio de Facturación Diaria"
           value={formatCurrency(analysisData.promedioVentaDiaria)}
           icon={TrendingUp}
           description="Últimos 30 días"
@@ -187,11 +188,11 @@ const Analysis: React.FC = () => {
               <Tooltip
                 contentStyle={{ backgroundColor: isDarkMode ? '#4B5563' : '#FFFFFF', borderColor: isDarkMode ? '#6B7280' : '#E5E7EB' }}
                 labelStyle={{ color: isDarkMode ? '#E5E7EB' : '#374151' }}
-                formatter={(value: number) => [formatCurrency(value), 'Ventas']}
+                formatter={(value: number) => [formatSales(value), 'Ventas']}
                 labelFormatter={(label) => `Hora: ${formatHour(label)}`}
               />
               <Legend />
-              <Bar dataKey="ventas" fill={theme.chartColors[0]} name="Ventas ($)" />
+              <Bar dataKey="ventas" fill={theme.chartColors[0]} name="Ventas Realizadas" />
             </BarChart>
           </ResponsiveContainer>
         </div>
@@ -221,14 +222,14 @@ const Analysis: React.FC = () => {
             <BarChart data={analysisData.ventasPorDiaSemana}>
               <CartesianGrid strokeDasharray="3 3" stroke={isDarkMode ? '#374151' : '#e5e7eb'} />
               <XAxis dataKey="dia" stroke={theme.text} />
-              <YAxis stroke={theme.text} tickFormatter={formatCurrency} />
+              <YAxis stroke={theme.text} tickFormatter={formatSales} />
               <Tooltip
                 contentStyle={{ backgroundColor: isDarkMode ? '#4B5563' : '#FFFFFF', borderColor: isDarkMode ? '#6B7280' : '#E5E7EB' }}
                 labelStyle={{ color: isDarkMode ? '#E5E7EB' : '#374151' }}
-                formatter={(value: number) => [formatCurrency(value), 'Ventas']}
+                formatter={(value: number) => [formatSales(value), 'Ventas']}
               />
               <Legend />
-              <Bar dataKey="ventas" fill={theme.chartColors[2]} name="Ventas ($)" />
+              <Bar dataKey="ventas" fill={theme.chartColors[2]} name="Ventas Realizadas" />
             </BarChart>
           </ResponsiveContainer>
         </div>

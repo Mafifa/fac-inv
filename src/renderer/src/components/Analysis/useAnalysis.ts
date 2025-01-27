@@ -25,9 +25,9 @@ const initialAnalysisData: AnalysisData = {
   tasaDolarHistorica: [],
   ventasPorProducto: [],
   ventasPorDiaSemana: [],
-  ventasPorFecha: [],
+  ventasPorFecha: [], // Estar pendiente de que las fechas sean por mes
   productosMasVendidos: [],
-  maxVentasDiarias: 0
+  maxVentasDiarias: 0 // Max de ventas diarias de ese mes
 }
 
 export const useAnalysis = () => {
