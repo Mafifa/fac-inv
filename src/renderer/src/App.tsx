@@ -26,7 +26,7 @@ const App: React.FC = () => {
   ]
 
   const handleUpdater = async () => {
-    await updateTasasDolar
+    await updateTasasDolar()
     await window.electron.ipcRenderer.invoke('update-tasas')
   }
 
