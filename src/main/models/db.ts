@@ -69,6 +69,13 @@ export async function getDb() {
       moneda_cambio TEXT,
       FOREIGN KEY (id_venta) REFERENCES ventas (id_venta)
     );
+
+    CREATE TABLE IF NOT EXISTS tasas_dolar (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      fuente TEXT NOT NULL,
+      tasa REAL NOT NULL,
+      fecha_actualizacion TEXT NOT NULL
+    )
   `)
 
   return db

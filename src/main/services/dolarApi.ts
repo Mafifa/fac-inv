@@ -1,21 +1,12 @@
 import https from 'https'
 
-interface DolarRate {
-  fuente: string
-  nombre: string
-  compra: number | null
-  venta: number | null
-  promedio: number
-  fechaActualizacion: string
-}
-
 function convertToVenezuelaTime(dateString: string): string {
   const date = new Date(dateString)
   const venezuelaTime = new Date(date.getTime() - 4 * 60 * 60 * 1000) // UTC-4
   return venezuelaTime.toLocaleString('es-VE', { timeZone: 'America/Caracas' })
 }
 
-async function fetchTasas(): Promise<DolarRate[]> {
+export async function fetchTasas(): Promise<DolarRate[]> {
   return new Promise((resolve, reject) => {
     const url = 'https://ve.dolarapi.com/v1/dolares'
     const options = {

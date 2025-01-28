@@ -1,4 +1,5 @@
 import { getDb } from './db'
+import { getTasasDolar } from './tasasDolar'
 
 export async function getAnalysisData(): Promise<AnalysisData> {
   const db = await getDb()
@@ -41,15 +42,7 @@ export async function getAnalysisData(): Promise<AnalysisData> {
     ORDER BY hora
   `)
 
-  const tasaDolarHistorica = await db.all(`
-    SELECT 
-      DATE(fecha_venta) as fecha,
-      AVG(tasa_dolar) as tasa
-    FROM ventas
-    GROUP BY DATE(fecha_venta)
-    ORDER BY fecha
-    LIMIT 15
-  `)
+  const tasaDolarHistorica = await getTasasDolar()
 
   const ventasPorProducto = await db.all(`
     SELECT 

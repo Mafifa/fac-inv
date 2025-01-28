@@ -43,6 +43,7 @@ const Analysis: React.FC = () => {
   const formatSales = (value: number) => `${value.toFixed(0)}`;
   const formatCurrency = (value: number) => `$${value.toFixed(2)}`;
   const formatNumber = (value: number) => value.toFixed(0);
+  const formatBolivares = (value: number) => `${value.toFixed(2)}Bs`;
 
   const SummaryCard: React.FC<{ title: string; value: string; icon: React.ElementType; description?: string }> = ({ title, value, icon: Icon, description }) => (
     <div className={`${theme.background} p-6 rounded-lg shadow-md flex flex-col justify-between`}>
@@ -137,6 +138,28 @@ const Analysis: React.FC = () => {
     return hourNum > 12 ? `${hourNum - 12} PM` : `${hourNum} AM`;
   };
 
+  const dataMap = new Map();
+
+  function formatDate (fecha) {
+    const date = new Date(fecha);
+    const year = date.getFullYear();
+    const month = date.getMonth() + 1; // Los meses en JavaScript son 0-indexados
+    const day = date.getDate();
+    return `${year}-${month}-${day}`;
+  }
+
+  analysisData.tasaDolarHistorica.forEach((item) => {
+    const formattedDate = formatDate(item.fecha_actualizacion);
+    if (!dataMap.has(formattedDate)) {
+      dataMap.set(formattedDate, { fecha_actualizacion: formattedDate });
+    }
+    dataMap.get(formattedDate)[item.fuente] = item.tasa;
+  });
+
+  const processedData = Array.from(dataMap.values());
+
+  const fuentes = Array.from(new Set(analysisData.tasaDolarHistorica.map((item) => item.fuente)));
+
   return (
     <div className={`analysis px-6 ${isDarkMode ? 'bg-gray-900 text-gray-100' : 'bg-gray-100 text-gray-900'}`}>
       <div className="flex justify-between items-center mb-2">
@@ -199,17 +222,28 @@ const Analysis: React.FC = () => {
         <div className={`${theme.background} p-6 rounded-lg shadow-md`}>
           <h2 className={`text-xl font-semibold mb-4 ${theme.title}`}>Tasa del Dólar Histórica</h2>
           <ResponsiveContainer width="100%" height={300}>
-            <LineChart data={analysisData.tasaDolarHistorica}>
-              <CartesianGrid strokeDasharray="3 3" stroke={isDarkMode ? '#374151' : '#e5e7eb'} />
-              <XAxis dataKey="fecha" stroke={theme.text} />
-              <YAxis stroke={theme.text} tickFormatter={formatNumber} />
+            <LineChart data={processedData.sort((a, b) => new Date(a.fecha_actualizacion).getTime() - new Date(b.fecha_actualizacion).getTime())}>
+              <CartesianGrid strokeDasharray="3 3" stroke={isDarkMode ? "#374151" : "#e5e7eb"} />
+              <XAxis dataKey="fecha_actualizacion" stroke={theme.text} />
+              <YAxis stroke={theme.text} tickFormatter={formatBolivares} />
               <Tooltip
-                contentStyle={{ backgroundColor: isDarkMode ? '#4B5563' : '#FFFFFF', borderColor: isDarkMode ? '#6B7280' : '#E5E7EB' }}
-                labelStyle={{ color: isDarkMode ? '#E5E7EB' : '#374151' }}
-                formatter={(value: number) => [formatNumber(value), 'Tasa del Dólar']}
+                contentStyle={{
+                  backgroundColor: isDarkMode ? "#4B5563" : "#FFFFFF",
+                  borderColor: isDarkMode ? "#6B7280" : "#E5E7EB",
+                }}
+                labelStyle={{ color: isDarkMode ? "#E5E7EB" : "#374151" }}
+                formatter={(value: number) => [formatBolivares(value), "Tasa del Dólar"]}
               />
               <Legend />
-              <Line type="monotone" dataKey="tasa" stroke={theme.chartColors[1]} name="Tasa del Dólar" />
+              {fuentes.map((fuente, index) => (
+                <Line
+                  key={fuente}
+                  type="monotone"
+                  dataKey={fuente}
+                  stroke={theme.chartColors[index % theme.chartColors.length]}
+                  name={fuente}
+                />
+              ))}
             </LineChart>
           </ResponsiveContainer>
         </div>

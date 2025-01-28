@@ -25,6 +25,11 @@ const App: React.FC = () => {
     { id: 'analisis', name: 'Análisis', icon: BarChart2 }
   ]
 
+  const handleUpdater = async () => {
+    await updateTasasDolar
+    await window.electron.ipcRenderer.invoke('update-tasas')
+  }
+
   return (
     <div className={`flex flex-col h-screen ${modoOscuro ? 'dark' : ''}`}>
       <div className={`flex-1 ${modoOscuro ? 'bg-gray-900' : 'bg-gray-100'}`}>
@@ -85,7 +90,7 @@ const App: React.FC = () => {
         {/* Botón flotante para actualizar tasas */}
         <div className="fixed bottom-6 right-6">
           <button
-            onClick={updateTasasDolar}
+            onClick={handleUpdater}
             onMouseEnter={() => setShowTooltip(true)}
             onMouseLeave={() => setShowTooltip(false)}
             className={`p-3 rounded-full shadow-lg transition-all duration-200 ease-in-out ${modoOscuro

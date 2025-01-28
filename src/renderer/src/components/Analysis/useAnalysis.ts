@@ -1,21 +1,10 @@
 import { useState, useEffect } from 'react'
 
-interface AnalysisData {
-  totalFacturadoBolivares: number
-  totalFacturadoDolares: number
-  productoMasVendido: string
-  cantidadProductoMasVendido: number
-  promedioVentaDiaria: number
-  ventasPorHora: { hora: string; ventas: number }[]
-  tasaDolarHistorica: { fecha: string; tasa: number }[]
-  ventasPorProducto: { nombre: string; cantidad: number; total: number }[]
-  ventasPorDiaSemana: { dia: string; ventas: number }[]
-  ventasPorFecha: { fecha: string; ventas: number }[]
-  productosMasVendidos: { nombre: string; cantidad: number; total: number }[]
+interface RenderAnalysisData extends AnalysisData {
   maxVentasDiarias: number
 }
 
-const initialAnalysisData: AnalysisData = {
+const initialAnalysisData: RenderAnalysisData = {
   totalFacturadoBolivares: 0,
   totalFacturadoDolares: 0,
   productoMasVendido: '',
@@ -27,11 +16,11 @@ const initialAnalysisData: AnalysisData = {
   ventasPorDiaSemana: [],
   ventasPorFecha: [], // Estar pendiente de que las fechas sean por mes
   productosMasVendidos: [],
-  maxVentasDiarias: 0 // Max de ventas diarias de ese mes
+  maxVentasDiarias: 0
 }
 
 export const useAnalysis = () => {
-  const [analysisData, setAnalysisData] = useState<AnalysisData>(initialAnalysisData)
+  const [analysisData, setAnalysisData] = useState<RenderAnalysisData>(initialAnalysisData)
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
