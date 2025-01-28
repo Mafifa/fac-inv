@@ -1,9 +1,9 @@
 import React, { useState } from 'react'
 import { Toaster } from 'sonner'
-import Dashboard from './components/Dashboard/dashboard'
-import Inventario from './components/Inventory/inventory'
-import Ventas from './components/Sales/sales'
-import Analisis from './components/Analysis/analysis'
+import Dashboard from './components/Dashboard/Dashboard'
+import Inventario from './components/Inventory/Inventory'
+import Ventas from './components/Sales/Sales'
+import Analisis from './components/Analysis/Analysis'
 import Historial from './components/History/history'
 import Configuracion from './components/Settings/settings'
 import { Home, Package, ShoppingCart, BarChart2, History, Settings, RefreshCw } from 'lucide-react'
@@ -24,6 +24,11 @@ const App: React.FC = () => {
     { id: 'historial', name: 'Historial', icon: History },
     { id: 'analisis', name: 'Análisis', icon: BarChart2 }
   ]
+
+  const handleUpdater = async () => {
+    await updateTasasDolar
+    await window.electron.ipcRenderer.invoke('update-tasas')
+  }
 
   return (
     <div className={`flex flex-col h-screen ${modoOscuro ? 'dark' : ''}`}>
@@ -85,7 +90,7 @@ const App: React.FC = () => {
         {/* Botón flotante para actualizar tasas */}
         <div className="fixed bottom-6 right-6">
           <button
-            onClick={updateTasasDolar}
+            onClick={handleUpdater}
             onMouseEnter={() => setShowTooltip(true)}
             onMouseLeave={() => setShowTooltip(false)}
             className={`p-3 rounded-full shadow-lg transition-all duration-200 ease-in-out ${modoOscuro

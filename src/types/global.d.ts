@@ -37,6 +37,13 @@ declare global {
     moneda_cambio: string
   }
 
+  interface TasaDolar {
+    id: number
+    fuente: string
+    tasa: number
+    fecha_actualizacion: string
+  }
+
   interface AnalysisData {
     totalFacturadoBolivares: number
     totalFacturadoDolares: number
@@ -44,7 +51,7 @@ declare global {
     cantidadProductoMasVendido: number
     promedioVentaDiaria: number
     ventasPorHora: { hora: string; ventas: number }[]
-    tasaDolarHistorica: { fecha: string; tasa: number }[]
+    tasaDolarHistorica: TasaDolar[]
     ventasPorProducto: { nombre: string; cantidad: number; total: number }[]
     ventasPorDiaSemana: { dia: string; ventas: number }[]
     ventasPorFecha: { fecha: string; ventas: number }[]

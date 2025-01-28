@@ -5,6 +5,7 @@ import { setupAnalysisController } from './analysis'
 import { setupDolarApiHandler } from '../services/dolarApi'
 import { setupDashboardController } from './dashboard'
 import { setupSalesHistoryController } from './history'
+import { setupTasasDolarController } from './tasasDolar'
 
 let controllersSetup = false
 
@@ -20,6 +21,7 @@ export function setupControllers(): void {
   setupDolarApiHandler(ipcMain)
   setupDashboardController(ipcMain)
   setupSalesHistoryController(ipcMain)
+  setupTasasDolarController(ipcMain)
 
   controllersSetup = true
   console.log('Controllers set up successfully')

@@ -40,8 +40,10 @@ const Analysis: React.FC = () => {
       : ['#3B82F6', '#10B981', '#F59E0B', '#EF4444'],
   };
 
+  const formatSales = (value: number) => `${value.toFixed(0)}`;
   const formatCurrency = (value: number) => `$${value.toFixed(2)}`;
   const formatNumber = (value: number) => value.toFixed(0);
+  const formatBolivares = (value: number) => `${value.toFixed(2)}Bs`;
 
   const SummaryCard: React.FC<{ title: string; value: string; icon: React.ElementType; description?: string }> = ({ title, value, icon: Icon, description }) => (
     <div className={`${theme.background} p-6 rounded-lg shadow-md flex flex-col justify-between`}>
@@ -58,48 +60,76 @@ const Analysis: React.FC = () => {
 
   const renderCalendarHeatmap = () => {
     const blueShades = [
-      'bg-blue-50', 'bg-blue-100', 'bg-blue-200', 'bg-blue-300',
-      'bg-blue-400', 'bg-blue-500', 'bg-blue-600', 'bg-blue-700',
-      'bg-blue-800', 'bg-blue-900'
-    ];
+      "bg-blue-50",
+      "bg-blue-100",
+      "bg-blue-200",
+      "bg-blue-300",
+      "bg-blue-400",
+      "bg-blue-500",
+      "bg-blue-600",
+      "bg-blue-700",
+      "bg-blue-800",
+      "bg-blue-900",
+    ]
 
     const getColor = (sales: number) => {
-      if (sales === 0) return isDarkMode ? 'bg-gray-800' : 'bg-gray-100';
-      const intensity = Math.min(Math.floor((sales / analysisData.maxVentasDiarias) * 10), 9);
-      return blueShades[intensity];
-    };
+      if (sales === 0) return isDarkMode ? "bg-gray-800" : "bg-gray-100"
+      const intensity = Math.min(Math.floor((sales / analysisData.maxVentasDiarias) * 10), 9)
+      return blueShades[intensity]
+    }
 
-    const today = new Date();
-    const startDate = new Date(today.getFullYear(), today.getMonth(), 1);
-    const endDate = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+    const today = new Date()
+    const startDate = new Date(today.getFullYear(), today.getMonth(), 1)
+    const endDate = new Date(today.getFullYear(), today.getMonth() + 1, 0)
 
-    const calendarDays: Array<{ date: Date; sales: number }> = [];
+    const calendarDays: Array<{ date: Date; sales: number }> = []
     for (let d = new Date(startDate); d <= endDate; d.setDate(d.getDate() + 1)) {
-      const dateStr = d.toISOString().split('T')[0];
-      const salesData = analysisData.ventasPorFecha.find(item => item.fecha === dateStr);
+      const dateStr = d.toISOString().split("T")[0]
+      const salesData = analysisData.ventasPorFecha.find((item) => item.fecha === dateStr)
       calendarDays.push({
         date: new Date(d),
-        sales: salesData ? salesData.ventas : 0
-      });
+        sales: salesData ? salesData.ventas : 0,
+      })
     }
+
+    const daysOfWeek = ["Domingo", "Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado"]
+    const firstDayOfMonth = startDate.getDay()
 
     return (
       <div className="grid grid-cols-7 gap-1">
+        {daysOfWeek.map((day, index) => (
+          <div key={`header-${index}`} className="text-center text-xs font-semibold py-1">
+            {day}
+          </div>
+        ))}
+        {Array(firstDayOfMonth)
+          .fill(null)
+          .map((_, index) => (
+            <div key={`empty-${index}`} className="aspect-square"></div>
+          ))}
         {calendarDays.map((day, index) => (
           <div
             key={index}
             className={`aspect-square relative rounded-md overflow-hidden ${getColor(day.sales)}`}
             title={`${day.date.toLocaleDateString()}: $${day.sales.toFixed(2)}`}
           >
-            <span className={`absolute inset-0 flex items-center justify-center text-xs font-semibold ${day.sales > 0 ? (isDarkMode ? 'text-white' : 'text-gray-800') : (isDarkMode ? 'text-gray-400' : 'text-gray-600')
-              }`}>
+            <span
+              className={`absolute inset-0 flex items-center justify-center text-xs font-semibold ${day.sales > 0
+                ? isDarkMode
+                  ? "text-white"
+                  : "text-gray-800"
+                : isDarkMode
+                  ? "text-gray-400"
+                  : "text-gray-600"
+                }`}
+            >
               {day.date.getDate()}
             </span>
           </div>
         ))}
       </div>
-    );
-  };
+    )
+  }
 
   const formatHour = (hour: string) => {
     const hourNum = parseInt(hour, 10);
@@ -107,6 +137,28 @@ const Analysis: React.FC = () => {
     if (hourNum === 12) return '12 PM';
     return hourNum > 12 ? `${hourNum - 12} PM` : `${hourNum} AM`;
   };
+
+  const dataMap = new Map();
+
+  function formatDate (fecha) {
+    const date = new Date(fecha);
+    const year = date.getFullYear();
+    const month = date.getMonth() + 1; // Los meses en JavaScript son 0-indexados
+    const day = date.getDate();
+    return `${year}-${month}-${day}`;
+  }
+
+  analysisData.tasaDolarHistorica.forEach((item) => {
+    const formattedDate = formatDate(item.fecha_actualizacion);
+    if (!dataMap.has(formattedDate)) {
+      dataMap.set(formattedDate, { fecha_actualizacion: formattedDate });
+    }
+    dataMap.get(formattedDate)[item.fuente] = item.tasa;
+  });
+
+  const processedData = Array.from(dataMap.values());
+
+  const fuentes = Array.from(new Set(analysisData.tasaDolarHistorica.map((item) => item.fuente)));
 
   return (
     <div className={`analysis px-6 ${isDarkMode ? 'bg-gray-900 text-gray-100' : 'bg-gray-100 text-gray-900'}`}>
@@ -131,7 +183,7 @@ const Analysis: React.FC = () => {
           description={`${formatNumber(analysisData.cantidadProductoMasVendido)} unidades`}
         />
         <SummaryCard
-          title="Promedio de Venta Diaria"
+          title="Promedio de Facturación Diaria"
           value={formatCurrency(analysisData.promedioVentaDiaria)}
           icon={TrendingUp}
           description="Últimos 30 días"
@@ -155,32 +207,43 @@ const Analysis: React.FC = () => {
                 stroke={theme.text}
                 tickFormatter={formatHour}
               />
-              <YAxis stroke={theme.text} tickFormatter={formatCurrency} />
+              <YAxis stroke={theme.text} tickFormatter={formatSales} />
               <Tooltip
                 contentStyle={{ backgroundColor: isDarkMode ? '#4B5563' : '#FFFFFF', borderColor: isDarkMode ? '#6B7280' : '#E5E7EB' }}
                 labelStyle={{ color: isDarkMode ? '#E5E7EB' : '#374151' }}
-                formatter={(value: number) => [formatCurrency(value), 'Ventas']}
+                formatter={(value: number) => [formatSales(value), 'Ventas']}
                 labelFormatter={(label) => `Hora: ${formatHour(label)}`}
               />
               <Legend />
-              <Bar dataKey="ventas" fill={theme.chartColors[0]} name="Ventas ($)" />
+              <Bar dataKey="ventas" fill={theme.chartColors[0]} name="Ventas Realizadas" />
             </BarChart>
           </ResponsiveContainer>
         </div>
         <div className={`${theme.background} p-6 rounded-lg shadow-md`}>
           <h2 className={`text-xl font-semibold mb-4 ${theme.title}`}>Tasa del Dólar Histórica</h2>
           <ResponsiveContainer width="100%" height={300}>
-            <LineChart data={analysisData.tasaDolarHistorica}>
-              <CartesianGrid strokeDasharray="3 3" stroke={isDarkMode ? '#374151' : '#e5e7eb'} />
-              <XAxis dataKey="fecha" stroke={theme.text} />
-              <YAxis stroke={theme.text} tickFormatter={formatNumber} />
+            <LineChart data={processedData.sort((a, b) => new Date(a.fecha_actualizacion).getTime() - new Date(b.fecha_actualizacion).getTime())}>
+              <CartesianGrid strokeDasharray="3 3" stroke={isDarkMode ? "#374151" : "#e5e7eb"} />
+              <XAxis dataKey="fecha_actualizacion" stroke={theme.text} />
+              <YAxis stroke={theme.text} tickFormatter={formatBolivares} />
               <Tooltip
-                contentStyle={{ backgroundColor: isDarkMode ? '#4B5563' : '#FFFFFF', borderColor: isDarkMode ? '#6B7280' : '#E5E7EB' }}
-                labelStyle={{ color: isDarkMode ? '#E5E7EB' : '#374151' }}
-                formatter={(value: number) => [formatNumber(value), 'Tasa del Dólar']}
+                contentStyle={{
+                  backgroundColor: isDarkMode ? "#4B5563" : "#FFFFFF",
+                  borderColor: isDarkMode ? "#6B7280" : "#E5E7EB",
+                }}
+                labelStyle={{ color: isDarkMode ? "#E5E7EB" : "#374151" }}
+                formatter={(value: number) => [formatBolivares(value), "Tasa del Dólar"]}
               />
               <Legend />
-              <Line type="monotone" dataKey="tasa" stroke={theme.chartColors[1]} name="Tasa del Dólar" />
+              {fuentes.map((fuente, index) => (
+                <Line
+                  key={fuente}
+                  type="monotone"
+                  dataKey={fuente}
+                  stroke={theme.chartColors[index % theme.chartColors.length]}
+                  name={fuente}
+                />
+              ))}
             </LineChart>
           </ResponsiveContainer>
         </div>
@@ -193,14 +256,14 @@ const Analysis: React.FC = () => {
             <BarChart data={analysisData.ventasPorDiaSemana}>
               <CartesianGrid strokeDasharray="3 3" stroke={isDarkMode ? '#374151' : '#e5e7eb'} />
               <XAxis dataKey="dia" stroke={theme.text} />
-              <YAxis stroke={theme.text} tickFormatter={formatCurrency} />
+              <YAxis stroke={theme.text} tickFormatter={formatSales} />
               <Tooltip
                 contentStyle={{ backgroundColor: isDarkMode ? '#4B5563' : '#FFFFFF', borderColor: isDarkMode ? '#6B7280' : '#E5E7EB' }}
                 labelStyle={{ color: isDarkMode ? '#E5E7EB' : '#374151' }}
-                formatter={(value: number) => [formatCurrency(value), 'Ventas']}
+                formatter={(value: number) => [formatSales(value), 'Ventas']}
               />
               <Legend />
-              <Bar dataKey="ventas" fill={theme.chartColors[2]} name="Ventas ($)" />
+              <Bar dataKey="ventas" fill={theme.chartColors[2]} name="Ventas Realizadas" />
             </BarChart>
           </ResponsiveContainer>
         </div>
